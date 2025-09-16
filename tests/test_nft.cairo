@@ -1,4 +1,6 @@
-use openzeppelin_token::erc721::interface::IERC721Dispatcher;
+use openzeppelin_token::erc721::interface::{
+    IERC721MetadataDispatcher, IERC721MetadataDispatcherTrait,
+};
 use snforge_std_deprecated::{ContractClassTrait, DeclareResultTrait, declare};
 use starknet::ContractAddress;
 
@@ -25,7 +27,13 @@ fn deploy_contract(name: ByteArray) -> ContractAddress {
 }
 
 #[test]
-fn test_create_nft() {
+fn test_initialize_nft() {
     let contract_address = deploy_contract("MyNFT");
-    let _dispatcher = IERC721Dispatcher { contract_address };
+    let dispatcher = IERC721MetadataDispatcher { contract_address };
+
+    let name = dispatcher.name();
+    assert_eq!(name, "MyNFT");
+
+    let symbol = dispatcher.symbol();
+    assert_eq!(symbol, "NFT");
 }
