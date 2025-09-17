@@ -14,9 +14,7 @@ pub mod NFTMarketplace {
     use starknet::storage::{
         Map, StoragePathEntry, StoragePointerReadAccess, StoragePointerWriteAccess,
     };
-    use starknet::{
-        ContractAddress, get_caller_address, get_contract_address,
-    };
+    use starknet::{ContractAddress, get_caller_address, get_contract_address};
 
     pub mod Errors {
         pub const PRICE_NOT_MET: felt252 = 'Marketplace: price not met';
