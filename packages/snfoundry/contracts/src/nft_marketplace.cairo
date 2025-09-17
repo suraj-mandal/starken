@@ -1,6 +1,8 @@
 #[starknet::contract]
 mod NFTMarketplace {
-    use starknet::ContractAddress;
+    use openzeppelin_token::erc721::interface::IERC721DispatcherTrait;
+use openzeppelin_token::erc721::interface::IERC721Dispatcher;
+use starknet::ContractAddress;
     use starknet::storage::{Map, StoragePathEntry, StoragePointerReadAccess};
 
     pub mod Errors {
@@ -76,6 +78,12 @@ mod NFTMarketplace {
         fn _is_listed(ref self: ContractState, nft_address: ContractAddress, token_id: u256) {
             let listing = self.s_listings.entry(nft_address).entry(token_id).read();
             assert(listing.price > 0, Errors::NOT_LISTED);
+        }
+        
+        fn _is_owner(ref self: ContractState, token_id: u256, spender: ContractAddress) {
+            let nft = IERC721Dispatcher { contract_address: spender };
+            let owner = nft.owner_of(token_id);
+            assert(spender == owner, Errors::NOT_OWNER);
         }
     }
 }
