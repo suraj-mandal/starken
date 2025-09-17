@@ -94,7 +94,7 @@ pub mod NFTMarketplace {
             let approved = nft.get_approved(token_id);
             assert(approved == get_contract_address(), Errors::NOT_APPROVED_FOR_MARKETPLACE);
 
-            self.s_listings.entry(nft_address).entry(token_id).write(Listing { price, seller });
+            self._store_listing(seller, nft_address, token_id, price);
 
             self.emit(ItemListed { seller, nft_address, token_id, price });
         }
@@ -104,11 +104,7 @@ pub mod NFTMarketplace {
             self._is_owner(nft_address, token_id, seller);
             self._is_listed(nft_address, token_id);
 
-            self
-                .s_listings
-                .entry(nft_address)
-                .entry(token_id)
-                .write(Listing { price: 0, seller: 0.try_into().unwrap() });
+            self._store_listing(0.try_into().unwrap(), nft_address, token_id, 0);
 
             self.emit(ItemCanceled { seller, nft_address, token_id });
         }
@@ -135,6 +131,16 @@ pub mod NFTMarketplace {
             let nft = IERC721Dispatcher { contract_address: nft_address };
             let owner = nft.owner_of(token_id);
             assert(spender == owner, Errors::NOT_OWNER);
+        }
+
+        fn _store_listing(
+            ref self: ContractState,
+            seller: ContractAddress,
+            nft_address: ContractAddress,
+            token_id: u256,
+            price: u256,
+        ) {
+            self.s_listings.entry(nft_address).entry(token_id).write(Listing { price, seller });
         }
     }
 }
