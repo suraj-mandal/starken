@@ -5,6 +5,13 @@ mod NFTMarketplace {
 
     pub mod Errors {
         pub const PRICE_NOT_MET: felt252 = 'Marketplace: price not met';
+        pub const ITEM_NOT_FOR_SALE: felt252 = 'Marketplace: item not for sale';
+        pub const NOT_LISTED: felt252 = 'Marketplace: item not listed';
+        pub const ALREADY_LISTED: felt252 = 'Marketplace: already listed';
+        pub const NO_PROCEEDS: felt252 = 'Marketplace: no proceeds';
+        pub const NOT_OWNER: felt252 = 'Marketplace: not owner';
+        pub const NOT_APPROVED_FOR_MARKETPLACE: felt252 = 'Marketplace: not approved';
+        pub const PRICE_MUST_BE_ABOVE_ZERO: felt252 = 'Marketplace: price not > zero';
     }
 
     #[derive(Drop, starknet::Event)]
@@ -63,7 +70,12 @@ mod NFTMarketplace {
     pub impl InternalImpl of InternalTrait {
         fn _not_listed(ref self: ContractState, nft_address: ContractAddress, token_id: u256) {
             let listing = self.s_listings.entry(nft_address).entry(token_id).read();
-            assert(listing.price > 0, Errors::PRICE_NOT_MET);
+            assert(listing.price <= 0, Errors::ALREADY_LISTED);
+        }
+
+        fn _is_listed(ref self: ContractState, nft_address: ContractAddress, token_id: u256) {
+            let listing = self.s_listings.entry(nft_address).entry(token_id).read();
+            assert(listing.price > 0, Errors::NOT_LISTED);
         }
     }
 }
