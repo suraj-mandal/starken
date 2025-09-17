@@ -1,7 +1,7 @@
 use contracts::nft::{IMyNFTDispatcher, IMyNFTDispatcherTrait};
-use openzeppelin_token::erc721::ERC721Component::{Event as ERC721Event, Transfer};
+use openzeppelin_token::erc721::ERC721Component::{Event, Transfer};
 use snforge_std::{
-    ContractClassTrait, DeclareResultTrait, Event, EventSpyAssertionsTrait, declare, spy_events,
+    ContractClassTrait, DeclareResultTrait, EventSpyAssertionsTrait, declare, spy_events,
     start_cheat_caller_address,
 };
 use starknet::ContractAddress;
@@ -34,12 +34,16 @@ fn test_create_nft() {
 
     dispatcher.create_nft();
 
-    let event: Event = ERC721Event::Transfer(
-        Transfer { from: 0.try_into().unwrap(), to: caller, token_id: 1 },
-    )
-        .into();
-
-    let expected_event: Array<(ContractAddress, Event)> = array![(contract_address, event)];
-
-    spy.assert_emitted(@expected_event);
+    spy
+        .assert_emitted(
+            @array![
+                (
+                    contract_address,
+                    Event::Transfer(
+                        Transfer { from: 0.try_into().unwrap(), to: caller, token_id: 1 },
+                    )
+                        .into(),
+                ),
+            ],
+        );
 }
