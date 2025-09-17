@@ -1,8 +1,19 @@
+use starknet::ContractAddress;
+
+#[starknet::interface]
+pub trait INFTMarketplace<TContractState> {
+    fn list_item(
+        ref self: TContractState, nft_address: ContractAddress, token_id: u256, price: u256,
+    );
+}
+
 #[starknet::contract]
 mod NFTMarketplace {
     use openzeppelin_token::erc721::interface::{IERC721Dispatcher, IERC721DispatcherTrait};
-    use starknet::ContractAddress;
-    use starknet::storage::{Map, StoragePathEntry, StoragePointerReadAccess};
+    use starknet::storage::{
+        Map, StoragePathEntry, StoragePointerReadAccess, StoragePointerWriteAccess,
+    };
+    use starknet::{ContractAddress, get_caller_address, get_contract_address};
 
     pub mod Errors {
         pub const PRICE_NOT_MET: felt252 = 'Marketplace: price not met';
@@ -67,6 +78,27 @@ mod NFTMarketplace {
         s_proceeds: Map<ContractAddress, u256>,
     }
 
+    #[abi(embed_v0)]
+    impl NFTMarketplaceImpl of super::INFTMarketplace<ContractState> {
+        fn list_item(
+            ref self: ContractState, nft_address: ContractAddress, token_id: u256, price: u256,
+        ) {
+            let seller = get_caller_address();
+            self._not_listed(nft_address, token_id);
+            self._is_owner(nft_address, token_id, seller);
+
+            assert(price > 0, Errors::PRICE_MUST_BE_ABOVE_ZERO);
+
+            let nft = IERC721Dispatcher { contract_address: nft_address };
+            let approved = nft.get_approved(token_id);
+            assert(approved == get_contract_address(), Errors::NOT_APPROVED_FOR_MARKETPLACE);
+
+            self.s_listings.entry(nft_address).entry(token_id).write(Listing { price, seller });
+
+            self.emit(ItemListed { seller, nft_address, token_id, price });
+        }
+    }
+
     #[generate_trait]
     pub impl InternalImpl of InternalTrait {
         fn _not_listed(ref self: ContractState, nft_address: ContractAddress, token_id: u256) {
@@ -79,8 +111,13 @@ mod NFTMarketplace {
             assert(listing.price > 0, Errors::NOT_LISTED);
         }
 
-        fn _is_owner(ref self: ContractState, token_id: u256, spender: ContractAddress) {
-            let nft = IERC721Dispatcher { contract_address: spender };
+        fn _is_owner(
+            ref self: ContractState,
+            nft_address: ContractAddress,
+            token_id: u256,
+            spender: ContractAddress,
+        ) {
+            let nft = IERC721Dispatcher { contract_address: nft_address };
             let owner = nft.owner_of(token_id);
             assert(spender == owner, Errors::NOT_OWNER);
         }
