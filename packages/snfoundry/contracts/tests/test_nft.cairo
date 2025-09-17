@@ -6,7 +6,7 @@ use snforge_std::{
 };
 use starknet::ContractAddress;
 
-fn deploy_contract(name: ByteArray) -> ContractAddress {
+pub fn deploy_nft_contract(name: ByteArray) -> ContractAddress {
     let contract = declare(name).unwrap().contract_class();
     // Manually serialize ByteArray for the constructor
     // https://www.starknet.io/cairo-book/ch102-04-serialization-of-cairo-types.html
@@ -23,7 +23,7 @@ fn deploy_contract(name: ByteArray) -> ContractAddress {
 
 #[test]
 fn test_create_nft() {
-    let contract_address = deploy_contract("MyNFT");
+    let contract_address = deploy_nft_contract("MyNFT");
     let dispatcher = IMyNFTDispatcher { contract_address };
 
     let mut spy = spy_events();
