@@ -69,8 +69,8 @@ pub mod NFTMarketplace {
 
     #[derive(Drop, Serde, starknet::Store)]
     struct Listing {
-        price: u256,
-        seller: ContractAddress,
+        pub price: u256,
+        pub seller: ContractAddress,
     }
 
     #[storage]
