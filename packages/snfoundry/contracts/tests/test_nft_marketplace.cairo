@@ -129,3 +129,49 @@ fn test_cancel_listing() {
             ],
         );
 }
+
+#[test]
+fn test_cancel_listing_state() {
+    let nft_address = deploy_nft_contract("MyNFT");
+    let marketplace_address = deploy_marketplace_contract("NFTMarketplace");
+
+    let caller: ContractAddress = 123.try_into().unwrap();
+    start_cheat_caller_address(nft_address, caller);
+    start_cheat_caller_address(marketplace_address, caller);
+
+    let nft = IMyNFTDispatcher { contract_address: nft_address };
+    nft.create_nft();
+
+    let token_id = 1;
+    let erc721 = IERC721Dispatcher { contract_address: nft_address };
+    erc721.approve(marketplace_address, token_id);
+
+    let marketplace = INFTMarketplaceDispatcher { contract_address: marketplace_address };
+    marketplace.list_item(nft_address, token_id, 200);
+
+    interact_with_state(
+        marketplace_address,
+        || {
+            let mut state = NFTMarketplace::contract_state_for_testing();
+
+            let listing = state._get_listing(nft_address, token_id);
+
+            assert(listing.seller == caller, 'seller should be 123');
+            assert(listing.price == 200, 'price should be 200');
+        },
+    );
+
+    marketplace.cancel_listing(nft_address, token_id);
+
+    interact_with_state(
+        marketplace_address,
+        || {
+            let mut state = NFTMarketplace::contract_state_for_testing();
+
+            let listing = state._get_listing(nft_address, token_id);
+
+            assert(listing.price == 0, 'price should be 0');
+            assert(listing.seller == 0.try_into().unwrap(), 'seller should be 0');
+        },
+    );
+}
