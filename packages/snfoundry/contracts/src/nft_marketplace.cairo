@@ -6,15 +6,23 @@ pub trait INFTMarketplace<TContractState> {
         ref self: TContractState, nft_address: ContractAddress, token_id: u256, price: u256,
     );
     fn cancel_listing(ref self: TContractState, nft_address: ContractAddress, token_id: u256);
+    fn buy_item(ref self: TContractState, token_id: u256);
 }
 
 #[starknet::contract]
 pub mod NFTMarketplace {
+    use openzeppelin_security::ReentrancyGuardComponent;
     use openzeppelin_token::erc721::interface::{IERC721Dispatcher, IERC721DispatcherTrait};
     use starknet::storage::{
         Map, StoragePathEntry, StoragePointerReadAccess, StoragePointerWriteAccess,
     };
     use starknet::{ContractAddress, get_caller_address, get_contract_address};
+
+    component!(
+        path: ReentrancyGuardComponent, storage: reentrancy_guard, event: ReentrancyGuardEvent,
+    );
+
+    impl ReentrancyInternalImpl = ReentrancyGuardComponent::InternalImpl<ContractState>;
 
     pub mod Errors {
         pub const PRICE_NOT_MET: felt252 = 'Marketplace: price not met';
@@ -65,6 +73,8 @@ pub mod NFTMarketplace {
         ItemListed: ItemListed,
         ItemCanceled: ItemCanceled,
         ItemBought: ItemBought,
+        #[flat]
+        ReentrancyGuardEvent: ReentrancyGuardComponent::Event,
     }
 
     #[derive(Drop, Serde, starknet::Store)]
@@ -77,6 +87,8 @@ pub mod NFTMarketplace {
     struct Storage {
         s_listings: Map<ContractAddress, Map<u256, Listing>>,
         s_proceeds: Map<ContractAddress, u256>,
+        #[substorage(v0)]
+        reentrancy_guard: ReentrancyGuardComponent::Storage,
     }
 
     #[abi(embed_v0)]
@@ -107,6 +119,13 @@ pub mod NFTMarketplace {
             self._store_listing(0.try_into().unwrap(), nft_address, token_id, 0);
 
             self.emit(ItemCanceled { seller, nft_address, token_id });
+        }
+
+        fn buy_item(ref self: ContractState, token_id: u256) {
+            self.reentrancy_guard.start();
+            // TODO: Revisit when it's clear how to process BTC payments
+
+            self.reentrancy_guard.end();
         }
     }
 
