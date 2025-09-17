@@ -113,12 +113,12 @@ pub mod NFTMarketplace {
     #[generate_trait]
     pub impl InternalImpl of InternalTrait {
         fn _not_listed(ref self: ContractState, nft_address: ContractAddress, token_id: u256) {
-            let listing = self.s_listings.entry(nft_address).entry(token_id).read();
+            let listing = self._get_listing(nft_address, token_id);
             assert(listing.price <= 0, Errors::ALREADY_LISTED);
         }
 
         fn _is_listed(ref self: ContractState, nft_address: ContractAddress, token_id: u256) {
-            let listing = self.s_listings.entry(nft_address).entry(token_id).read();
+            let listing = self._get_listing(nft_address, token_id);
             assert(listing.price > 0, Errors::NOT_LISTED);
         }
 
@@ -141,6 +141,12 @@ pub mod NFTMarketplace {
             price: u256,
         ) {
             self.s_listings.entry(nft_address).entry(token_id).write(Listing { price, seller });
+        }
+
+        fn _get_listing(
+            ref self: ContractState, nft_address: ContractAddress, token_id: u256,
+        ) -> Listing {
+            self.s_listings.entry(nft_address).entry(token_id).read()
         }
     }
 }
