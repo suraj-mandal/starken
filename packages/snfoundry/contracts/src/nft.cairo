@@ -1,3 +1,8 @@
+#[starknet::interface]
+pub trait IMyNFT<TContractState> {
+    fn create_nft(ref self: TContractState);
+}
+
 #[starknet::contract]
 mod MyNFT {
     use openzeppelin_introspection::src5::SRC5Component;
@@ -38,8 +43,10 @@ mod MyNFT {
         self.erc721.initializer(name, symbol, base_uri);
     }
 
-    #[external(v0)]
-    fn create_nft(ref self: ContractState) {
-        self.erc721.mint(get_caller_address(), self.token_id.read() + 1);
+    #[abi(embed_v0)]
+    impl MyNFTImpl of super::IMyNFT<ContractState> {
+        fn create_nft(ref self: ContractState) {
+            self.erc721.mint(get_caller_address(), self.token_id.read() + 1);
+        }
     }
 }
