@@ -1,8 +1,12 @@
-use openzeppelin_token::erc721::interface::IERC721Dispatcher;
-use snforge_std::{ContractClassTrait, DeclareResultTrait, declare};
+use contracts::nft::{IMyNFTDispatcher, IMyNFTDispatcherTrait};
+use openzeppelin_token::erc721::ERC721Component::{Event, Transfer};
+use snforge_std::{
+    ContractClassTrait, DeclareResultTrait, EventSpyAssertionsTrait, declare, spy_events,
+    start_cheat_caller_address,
+};
 use starknet::ContractAddress;
 
-fn deploy_contract(name: ByteArray) -> ContractAddress {
+pub fn deploy_nft_contract(name: ByteArray) -> ContractAddress {
     let contract = declare(name).unwrap().contract_class();
     // Manually serialize ByteArray for the constructor
     // https://www.starknet.io/cairo-book/ch102-04-serialization-of-cairo-types.html
@@ -19,6 +23,27 @@ fn deploy_contract(name: ByteArray) -> ContractAddress {
 
 #[test]
 fn test_create_nft() {
-    let contract_address = deploy_contract("MyNFT");
-    let _dispatcher = IERC721Dispatcher { contract_address };
+    let contract_address = deploy_nft_contract("MyNFT");
+    let dispatcher = IMyNFTDispatcher { contract_address };
+
+    let mut spy = spy_events();
+
+    let caller: ContractAddress = 123.try_into().unwrap();
+
+    start_cheat_caller_address(contract_address, caller);
+
+    dispatcher.create_nft();
+
+    spy
+        .assert_emitted(
+            @array![
+                (
+                    contract_address,
+                    Event::Transfer(
+                        Transfer { from: 0.try_into().unwrap(), to: caller, token_id: 1 },
+                    )
+                        .into(),
+                ),
+            ],
+        );
 }
