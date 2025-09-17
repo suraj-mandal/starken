@@ -8,7 +8,7 @@ pub trait INFTMarketplace<TContractState> {
 }
 
 #[starknet::contract]
-mod NFTMarketplace {
+pub mod NFTMarketplace {
     use openzeppelin_token::erc721::interface::{IERC721Dispatcher, IERC721DispatcherTrait};
     use starknet::storage::{
         Map, StoragePathEntry, StoragePointerReadAccess, StoragePointerWriteAccess,
