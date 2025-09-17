@@ -5,6 +5,7 @@ pub trait INFTMarketplace<TContractState> {
     fn list_item(
         ref self: TContractState, nft_address: ContractAddress, token_id: u256, price: u256,
     );
+    fn cancel_listing(ref self: TContractState, nft_address: ContractAddress, token_id: u256);
 }
 
 #[starknet::contract]
@@ -13,7 +14,9 @@ pub mod NFTMarketplace {
     use starknet::storage::{
         Map, StoragePathEntry, StoragePointerReadAccess, StoragePointerWriteAccess,
     };
-    use starknet::{ContractAddress, get_caller_address, get_contract_address};
+    use starknet::{
+        ContractAddress, get_caller_address, get_contract_address,
+    };
 
     pub mod Errors {
         pub const PRICE_NOT_MET: felt252 = 'Marketplace: price not met';
@@ -96,6 +99,20 @@ pub mod NFTMarketplace {
             self.s_listings.entry(nft_address).entry(token_id).write(Listing { price, seller });
 
             self.emit(ItemListed { seller, nft_address, token_id, price });
+        }
+
+        fn cancel_listing(ref self: ContractState, nft_address: ContractAddress, token_id: u256) {
+            let seller = get_caller_address();
+            self._is_owner(nft_address, token_id, seller);
+            self._is_listed(nft_address, token_id);
+
+            self
+                .s_listings
+                .entry(nft_address)
+                .entry(token_id)
+                .write(Listing { price: 0, seller: 0.try_into().unwrap() });
+
+            self.emit(ItemCanceled { seller, nft_address, token_id });
         }
     }
 
