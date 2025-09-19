@@ -4,6 +4,7 @@ package-lock.json
 .idea
 
 # yarn / eslint
+.yarn
 .yarn/*
 !.yarn/patches
 !.yarn/plugins
