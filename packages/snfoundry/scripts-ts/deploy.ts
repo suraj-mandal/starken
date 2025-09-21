@@ -46,9 +46,11 @@ import { green } from "./helpers/colorize-log";
  */
 const deployScript = async (): Promise<void> => {
   await deployContract({
-    contract: "YourContract",
+    contract: "MyNFT",
     constructorArgs: {
-      owner: deployer.address,
+      name: 'MyNFT',
+      symbol: 'NFT',
+      base_uri: 'https://api.example.com/v1/',
     },
   });
 };
