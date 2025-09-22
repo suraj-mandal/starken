@@ -5,6 +5,9 @@ pub trait INFTMarketplace<TContractState> {
     fn list_item(
         ref self: TContractState, nft_address: ContractAddress, token_id: u256, price: u256,
     );
+    fn update_listing(
+        ref self: TContractState, nft_address: ContractAddress, token_id: u256, new_price: u256,
+    );
     fn cancel_listing(ref self: TContractState, nft_address: ContractAddress, token_id: u256);
     fn buy_item(
         ref self: TContractState, nft_address: ContractAddress, token_id: u256, data: Span<felt252>,
@@ -125,6 +128,20 @@ pub mod NFTMarketplace {
             self.emit(ItemListed { seller, nft_address, token_id, price });
         }
 
+        fn update_listing(
+            ref self: ContractState, nft_address: ContractAddress, token_id: u256, new_price: u256,
+        ) {
+            let seller = get_caller_address();
+            self._not_listed(nft_address, token_id);
+            self._is_owner(nft_address, token_id, seller);
+
+            assert(new_price > 0, Errors::PRICE_MUST_BE_ABOVE_ZERO);
+
+            self.listings.store_listing(seller, nft_address, token_id, new_price);
+
+            self.emit(ItemListed { seller, nft_address, token_id, price: new_price });
+        }
+
         fn cancel_listing(ref self: ContractState, nft_address: ContractAddress, token_id: u256) {
             let seller = get_caller_address();
             self._is_owner(nft_address, token_id, seller);
@@ -141,8 +158,8 @@ pub mod NFTMarketplace {
             token_id: u256,
             data: Span<felt252>,
         ) {
-            self._is_listed(nft_address, token_id);
             self.reentrancy_guard.start();
+            self._is_listed(nft_address, token_id);
 
             let buyer = get_caller_address();
             let strk_contract_address = FELT_STRK_CONTRACT.try_into().unwrap();
