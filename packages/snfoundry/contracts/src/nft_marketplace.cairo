@@ -12,6 +12,7 @@ pub trait INFTMarketplace<TContractState> {
     fn buy_item(
         ref self: TContractState, nft_address: ContractAddress, token_id: u256, data: Span<felt252>,
     );
+    fn withdraw_proceeds(ref self: TContractState);
 }
 
 #[starknet::contract]
@@ -167,9 +168,9 @@ pub mod NFTMarketplace {
             let user_balance = strk_dispatcher.balance_of(buyer);
             let listed_item = self.listings.get_listing(nft_address, token_id);
 
-            assert(user_balance > listed_item.price, Errors::PRICE_NOT_MET);
+            assert(user_balance >= listed_item.price, Errors::PRICE_NOT_MET);
 
-            strk_dispatcher.transfer(get_contract_address(), listed_item.price);
+            strk_dispatcher.transfer_from(buyer, get_contract_address(), listed_item.price);
 
             self.proceeds.increment_balance(listed_item.seller, listed_item.price);
 
@@ -179,6 +180,22 @@ pub mod NFTMarketplace {
             nft_dispatcher.safe_transfer_from(listed_item.seller, buyer, token_id, data);
 
             self.emit(ItemBought { buyer, nft_address, token_id, price: listed_item.price });
+
+            self.reentrancy_guard.end();
+        }
+
+        fn withdraw_proceeds(ref self: ContractState) {
+            self.reentrancy_guard.start();
+
+            let seller = get_caller_address();
+            let proceeds = self.proceeds.get_seller_balance(seller);
+            assert(proceeds > 0, Errors::NO_PROCEEDS);
+
+            self.proceeds.clear_seller_balance(seller);
+
+            let strk_contract_address = FELT_STRK_CONTRACT.try_into().unwrap();
+            let strk_dispatcher = IERC20Dispatcher { contract_address: strk_contract_address };
+            strk_dispatcher.transfer(seller, proceeds);
 
             self.reentrancy_guard.end();
         }

@@ -4,6 +4,7 @@ use starknet::ContractAddress;
 pub trait IProceeds<TState> {
     fn get_seller_balance(self: @TState, seller_address: ContractAddress) -> u256;
     fn increment_balance(ref self: TState, seller_address: ContractAddress, amount: u256);
+    fn clear_seller_balance(ref self: TState, seller_address: ContractAddress);
 }
 
 #[starknet::component]
@@ -36,6 +37,12 @@ pub mod ProceedsComponent {
             let balance = self.get_seller_balance(seller_address);
             let new_balance = balance + amount;
             self.proceeds.entry(seller_address).write(new_balance);
+        }
+
+        fn clear_seller_balance(
+            ref self: ComponentState<TContractState>, seller_address: ContractAddress,
+        ) {
+            self.proceeds.entry(seller_address).write(0);
         }
     }
 }
