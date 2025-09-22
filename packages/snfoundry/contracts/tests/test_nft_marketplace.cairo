@@ -1,4 +1,4 @@
-use NFTMarketplace::{ItemCanceled, ItemListed};
+use NFTMarketplace::{FELT_STRK_CONTRACT, ItemCanceled, ItemListed};
 use contracts::components::listings::{IListings, Listing};
 use contracts::nft::{IMyNFTDispatcher, IMyNFTDispatcherTrait};
 use contracts::nft_marketplace::{
@@ -18,8 +18,18 @@ fn deploy_marketplace_contract(name: ByteArray) -> ContractAddress {
     contract_address
 }
 
-pub const FELT_STRK_CONTRACT: felt252 =
-    0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d;
+fn deploy_erc_20_contract() -> ContractAddress {
+    let contract = declare("MyERC20Token").unwrap().contract_class();
+    let constructor_data = array![
+        0, 0x4d79546f6b656e, 7, // "MyToken"
+        0, 0x4d544b, 3, // "MTK"
+        0x0f4240,
+        0x0, // fixed_supply = 1_000_000 (u256 low, high)
+        FELT_STRK_CONTRACT // recipient
+    ];
+    let (contract_address, _) = contract.deploy(@constructor_data).unwrap();
+    contract_address
+}
 
 #[test]
 fn test_list_nft_item() {
@@ -300,23 +310,11 @@ fn test_cancel_listing_state() {
         },
     );
 }
-// #[test]
-// fn test_buy_item() {
-//     let nft_address = deploy_nft_contract("MyNFT");
-//     let marketplace_address = deploy_marketplace_contract("NFTMarketplace");
 
-//     let caller: ContractAddress = 123.try_into().unwrap();
-//     start_cheat_caller_address(nft_address, caller);
-//     start_cheat_caller_address(marketplace_address, caller);
+#[test]
+fn test_buy_item() {
+    let token_address = deploy_erc_20_contract();
 
-//     let nft = IMyNFTDispatcher { contract_address: nft_address };
-//     nft.create_nft();
-
-//     let erc721 = IERC721Dispatcher { contract_address: nft_address };
-//     erc721.approve(marketplace_address, 1);
-
-//     let marketplace = INFTMarketplaceDispatcher { contract_address: marketplace_address };
-//     marketplace.list_item(nft_address, 1, 200);
-
-// }
+    println!("{:?}", token_address);
+}
 

@@ -1,3 +1,4 @@
+pub mod erc20;
 pub mod nft;
 pub mod nft_marketplace;
 pub mod components {
