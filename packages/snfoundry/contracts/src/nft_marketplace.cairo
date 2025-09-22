@@ -137,7 +137,7 @@ pub mod NFTMarketplace {
             ref self: ContractState, nft_address: ContractAddress, token_id: u256, new_price: u256,
         ) {
             let seller = get_caller_address();
-            self._not_listed(nft_address, token_id);
+            self._is_listed(nft_address, token_id);
             self._is_owner(nft_address, token_id, seller);
 
             assert(new_price > 0, Errors::PRICE_MUST_BE_ABOVE_ZERO);
