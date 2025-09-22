@@ -2,8 +2,8 @@ use starknet::ContractAddress;
 
 #[starknet::interface]
 pub trait IProceeds<TState> {
-    fn seller_balance(self: @TState, seller_address: ContractAddress) -> u256;
-    fn increment(ref self: TState, seller_address: ContractAddress, amount: u256);
+    fn get_seller_balance(self: @TState, seller_address: ContractAddress) -> u256;
+    fn increment_balance(ref self: TState, seller_address: ContractAddress, amount: u256);
 }
 
 #[starknet::component]
@@ -24,16 +24,16 @@ pub mod ProceedsComponent {
     impl Proceeds<
         TContractState, +HasComponent<TContractState>,
     > of IProceeds<ComponentState<TContractState>> {
-        fn seller_balance(
+        fn get_seller_balance(
             self: @ComponentState<TContractState>, seller_address: ContractAddress,
         ) -> u256 {
             self.proceeds.entry(seller_address).read()
         }
 
-        fn increment(
+        fn increment_balance(
             ref self: ComponentState<TContractState>, seller_address: ContractAddress, amount: u256,
         ) {
-            let balance = self.seller_balance(seller_address);
+            let balance = self.get_seller_balance(seller_address);
             let new_balance = balance + amount;
             self.proceeds.entry(seller_address).write(new_balance);
         }

@@ -1,4 +1,5 @@
-use NFTMarketplace::{InternalTrait, ItemCanceled, ItemListed};
+use NFTMarketplace::{ItemCanceled, ItemListed};
+use contracts::components::listings::IListings;
 use contracts::nft::{IMyNFTDispatcher, IMyNFTDispatcherTrait};
 use contracts::nft_marketplace::{
     INFTMarketplaceDispatcher, INFTMarketplaceDispatcherTrait, NFTMarketplace,
@@ -71,7 +72,7 @@ fn test_list_nft_item_state() {
         || {
             let mut state = NFTMarketplace::contract_state_for_testing();
 
-            let listing = state._get_listing(nft_address, token_id);
+            let listing = state.listings.get_listing(nft_address, token_id);
 
             assert(listing.price == 0, 'price should be zero');
             assert(listing.seller == 0.try_into().unwrap(), 'seller should be zero');
@@ -86,7 +87,7 @@ fn test_list_nft_item_state() {
         || {
             let mut state = NFTMarketplace::contract_state_for_testing();
 
-            let listing = state._get_listing(nft_address, token_id);
+            let listing = state.listings.get_listing(nft_address, token_id);
 
             assert(listing.price == 200, 'price should be 200');
             assert(listing.seller == 123.try_into().unwrap(), 'seller should be 123');
@@ -154,7 +155,7 @@ fn test_cancel_listing_state() {
         || {
             let mut state = NFTMarketplace::contract_state_for_testing();
 
-            let listing = state._get_listing(nft_address, token_id);
+            let listing = state.listings.get_listing(nft_address, token_id);
 
             assert(listing.seller == caller, 'seller should be 123');
             assert(listing.price == 200, 'price should be 200');
@@ -168,7 +169,7 @@ fn test_cancel_listing_state() {
         || {
             let mut state = NFTMarketplace::contract_state_for_testing();
 
-            let listing = state._get_listing(nft_address, token_id);
+            let listing = state.listings.get_listing(nft_address, token_id);
 
             assert(listing.price == 0, 'price should be 0');
             assert(listing.seller == 0.try_into().unwrap(), 'seller should be 0');

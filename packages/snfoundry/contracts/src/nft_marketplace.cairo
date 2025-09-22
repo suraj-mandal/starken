@@ -18,15 +18,15 @@ pub mod NFTMarketplace {
     use openzeppelin_token::erc20::interface::{IERC20Dispatcher, IERC20DispatcherTrait};
     use openzeppelin_token::erc721::interface::{IERC721Dispatcher, IERC721DispatcherTrait};
     use starknet::event::EventEmitter;
-    use starknet::storage::{
-        Map, StoragePathEntry, StoragePointerReadAccess, StoragePointerWriteAccess,
-    };
+    use starknet::storage::Map;
     use starknet::{ContractAddress, get_caller_address, get_contract_address};
+    use crate::components::listings::{IListings, ListingsComponent};
 
+    component!(path: ProceedsComponent, storage: proceeds, event: ProceedsEvent);
+    component!(path: ListingsComponent, storage: listings, event: ListingsEvent);
     component!(
         path: ReentrancyGuardComponent, storage: reentrancy_guard, event: ReentrancyGuardEvent,
     );
-    component!(path: ProceedsComponent, storage: proceeds, event: ProceedsEvent);
 
     pub const FELT_STRK_CONTRACT: felt252 =
         0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d;
@@ -85,6 +85,7 @@ pub mod NFTMarketplace {
         #[flat]
         ReentrancyGuardEvent: ReentrancyGuardComponent::Event,
         ProceedsEvent: ProceedsComponent::Event,
+        ListingsEvent: ListingsComponent::Event,
     }
 
     #[derive(Drop, Serde, starknet::Store)]
@@ -97,9 +98,11 @@ pub mod NFTMarketplace {
     struct Storage {
         s_listings: Map<ContractAddress, Map<u256, Listing>>,
         #[substorage(v0)]
-        proceeds: ProceedsComponent::Storage,
+        pub proceeds: ProceedsComponent::Storage,
         #[substorage(v0)]
         reentrancy_guard: ReentrancyGuardComponent::Storage,
+        #[substorage(v0)]
+        pub listings: ListingsComponent::Storage,
     }
 
     #[abi(embed_v0)]
@@ -117,7 +120,7 @@ pub mod NFTMarketplace {
             let approved = nft.get_approved(token_id);
             assert(approved == get_contract_address(), Errors::NOT_APPROVED_FOR_MARKETPLACE);
 
-            self._store_listing(seller, nft_address, token_id, price);
+            self.listings.store_listing(seller, nft_address, token_id, price);
 
             self.emit(ItemListed { seller, nft_address, token_id, price });
         }
@@ -127,7 +130,7 @@ pub mod NFTMarketplace {
             self._is_owner(nft_address, token_id, seller);
             self._is_listed(nft_address, token_id);
 
-            self._store_listing(0.try_into().unwrap(), nft_address, token_id, 0);
+            self.listings.store_listing(0.try_into().unwrap(), nft_address, token_id, 0);
 
             self.emit(ItemCanceled { seller, nft_address, token_id });
         }
@@ -145,15 +148,15 @@ pub mod NFTMarketplace {
             let strk_contract_address = FELT_STRK_CONTRACT.try_into().unwrap();
             let strk_dispatcher = IERC20Dispatcher { contract_address: strk_contract_address };
             let user_balance = strk_dispatcher.balance_of(buyer);
-            let listed_item = self._get_listing(nft_address, token_id);
+            let listed_item = self.listings.get_listing(nft_address, token_id);
 
             assert(user_balance > listed_item.price, Errors::PRICE_NOT_MET);
 
             strk_dispatcher.transfer(get_contract_address(), listed_item.price);
 
-            self.proceeds.increment(listed_item.seller, listed_item.price);
+            self.proceeds.increment_balance(listed_item.seller, listed_item.price);
 
-            self._remove_listing(nft_address, token_id);
+            self.listings.remove_listing(nft_address, token_id);
 
             let nft_dispatcher = IERC721Dispatcher { contract_address: nft_address };
             nft_dispatcher.safe_transfer_from(listed_item.seller, buyer, token_id, data);
@@ -167,12 +170,12 @@ pub mod NFTMarketplace {
     #[generate_trait]
     pub impl InternalImpl of InternalTrait {
         fn _not_listed(ref self: ContractState, nft_address: ContractAddress, token_id: u256) {
-            let listing = self._get_listing(nft_address, token_id);
+            let listing = self.listings.get_listing(nft_address, token_id);
             assert(listing.price <= 0, Errors::ALREADY_LISTED);
         }
 
         fn _is_listed(ref self: ContractState, nft_address: ContractAddress, token_id: u256) {
-            let listing = self._get_listing(nft_address, token_id);
+            let listing = self.listings.get_listing(nft_address, token_id);
             assert(listing.price > 0, Errors::NOT_LISTED);
         }
 
@@ -185,30 +188,6 @@ pub mod NFTMarketplace {
             let nft = IERC721Dispatcher { contract_address: nft_address };
             let owner = nft.owner_of(token_id);
             assert(spender == owner, Errors::NOT_OWNER);
-        }
-
-        fn _store_listing(
-            ref self: ContractState,
-            seller: ContractAddress,
-            nft_address: ContractAddress,
-            token_id: u256,
-            price: u256,
-        ) {
-            self.s_listings.entry(nft_address).entry(token_id).write(Listing { price, seller });
-        }
-
-        fn _get_listing(
-            ref self: ContractState, nft_address: ContractAddress, token_id: u256,
-        ) -> Listing {
-            self.s_listings.entry(nft_address).entry(token_id).read()
-        }
-
-        fn _remove_listing(ref self: ContractState, nft_address: ContractAddress, token_id: u256) {
-            self
-                .s_listings
-                .entry(nft_address)
-                .entry(token_id)
-                .write(Listing { price: 0, seller: 0.try_into().unwrap() });
         }
     }
 }
