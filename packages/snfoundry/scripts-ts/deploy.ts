@@ -48,9 +48,9 @@ const deployScript = async (): Promise<void> => {
   await deployContract({
     contract: "MyNFT",
     constructorArgs: {
-      name: 'MyNFT',
-      symbol: 'NFT',
-      base_uri: 'https://api.example.com/v1/',
+      name: "MyNFT",
+      symbol: "NFT",
+      base_uri: "https://api.example.com/v1/",
     },
   });
 };
