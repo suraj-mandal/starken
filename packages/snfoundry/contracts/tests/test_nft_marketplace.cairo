@@ -1,5 +1,5 @@
 use NFTMarketplace::{ItemCanceled, ItemListed};
-use contracts::components::listings::IListings;
+use contracts::components::listings::{IListings, Listing};
 use contracts::nft::{IMyNFTDispatcher, IMyNFTDispatcherTrait};
 use contracts::nft_marketplace::{
     INFTMarketplaceDispatcher, INFTMarketplaceDispatcherTrait, NFTMarketplace,
@@ -93,6 +93,29 @@ fn test_list_nft_item_state() {
             assert(listing.seller == 123.try_into().unwrap(), 'seller should be 123');
         },
     );
+}
+
+#[test]
+fn test_get_listing() {
+    let nft_address = deploy_nft_contract("MyNFT");
+    let marketplace_address = deploy_marketplace_contract("NFTMarketplace");
+
+    let caller: ContractAddress = 123.try_into().unwrap();
+    start_cheat_caller_address(nft_address, caller);
+    start_cheat_caller_address(marketplace_address, caller);
+
+    let nft = IMyNFTDispatcher { contract_address: nft_address };
+    nft.create_nft();
+
+    let token_id = 1;
+    let erc721 = IERC721Dispatcher { contract_address: nft_address };
+    erc721.approve(marketplace_address, token_id);
+
+    let marketplace = INFTMarketplaceDispatcher { contract_address: marketplace_address };
+    marketplace.list_item(nft_address, token_id, 200);
+
+    let listing = marketplace.get_listing(nft_address, token_id);
+    assert(listing == Listing { seller: caller, price: 200 }, 'listing does not match');
 }
 
 #[test]

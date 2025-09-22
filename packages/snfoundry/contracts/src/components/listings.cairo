@@ -1,6 +1,6 @@
 use starknet::ContractAddress;
 
-#[derive(Drop, Serde, starknet::Store)]
+#[derive(Drop, Serde, starknet::Store, PartialEq)]
 pub struct Listing {
     pub price: u256,
     pub seller: ContractAddress,
