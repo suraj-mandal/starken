@@ -1,14 +1,14 @@
 use starknet::ContractAddress;
 
 #[derive(Drop, Serde, starknet::Store)]
-struct Listing {
+pub struct Listing {
     pub price: u256,
     pub seller: ContractAddress,
 }
 
 #[starknet::interface]
 pub trait IListings<TState> {
-    fn get_listing(ref self: TState, nft_address: ContractAddress, token_id: u256) -> Listing;
+    fn get_listing(self: @TState, nft_address: ContractAddress, token_id: u256) -> Listing;
     fn store_listing(
         ref self: TState,
         seller: ContractAddress,
@@ -37,7 +37,7 @@ pub mod ListingsComponent {
         TContractState, +HasComponent<TContractState>,
     > of IListings<ComponentState<TContractState>> {
         fn get_listing(
-            ref self: ComponentState<TContractState>, nft_address: ContractAddress, token_id: u256,
+            self: @ComponentState<TContractState>, nft_address: ContractAddress, token_id: u256,
         ) -> Listing {
             self.listings.entry(nft_address).entry(token_id).read()
         }

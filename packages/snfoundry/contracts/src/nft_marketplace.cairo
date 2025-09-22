@@ -1,10 +1,12 @@
 use starknet::ContractAddress;
+use crate::components::listings::Listing;
 
 #[starknet::interface]
 pub trait INFTMarketplace<TContractState> {
     fn list_item(
         ref self: TContractState, nft_address: ContractAddress, token_id: u256, price: u256,
     );
+    fn get_listing(self: @TContractState, nft_address: ContractAddress, token_id: u256) -> Listing;
     fn update_listing(
         ref self: TContractState, nft_address: ContractAddress, token_id: u256, new_price: u256,
     );
@@ -12,6 +14,7 @@ pub trait INFTMarketplace<TContractState> {
     fn buy_item(
         ref self: TContractState, nft_address: ContractAddress, token_id: u256, data: Span<felt252>,
     );
+    fn get_proceeds(self: @TContractState, seller_address: ContractAddress) -> u256;
     fn withdraw_proceeds(ref self: TContractState);
 }
 
@@ -25,6 +28,7 @@ pub mod NFTMarketplace {
     use starknet::storage::Map;
     use starknet::{ContractAddress, get_caller_address, get_contract_address};
     use crate::components::listings::{IListings, ListingsComponent};
+    use super::Listing;
 
     component!(path: ProceedsComponent, storage: proceeds, event: ProceedsEvent);
     component!(path: ListingsComponent, storage: listings, event: ListingsEvent);
@@ -92,12 +96,6 @@ pub mod NFTMarketplace {
         ListingsEvent: ListingsComponent::Event,
     }
 
-    #[derive(Drop, Serde, starknet::Store)]
-    struct Listing {
-        pub price: u256,
-        pub seller: ContractAddress,
-    }
-
     #[storage]
     struct Storage {
         s_listings: Map<ContractAddress, Map<u256, Listing>>,
@@ -127,6 +125,12 @@ pub mod NFTMarketplace {
             self.listings.store_listing(seller, nft_address, token_id, price);
 
             self.emit(ItemListed { seller, nft_address, token_id, price });
+        }
+
+        fn get_listing(
+            self: @ContractState, nft_address: ContractAddress, token_id: u256,
+        ) -> Listing {
+            self.listings.get_listing(nft_address, token_id)
         }
 
         fn update_listing(
@@ -182,6 +186,10 @@ pub mod NFTMarketplace {
             self.emit(ItemBought { buyer, nft_address, token_id, price: listed_item.price });
 
             self.reentrancy_guard.end();
+        }
+
+        fn get_proceeds(self: @ContractState, seller_address: ContractAddress) -> u256 {
+            self.proceeds.get_seller_balance(seller_address)
         }
 
         fn withdraw_proceeds(ref self: ContractState) {
