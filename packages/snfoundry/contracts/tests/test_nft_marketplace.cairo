@@ -18,6 +18,9 @@ fn deploy_marketplace_contract(name: ByteArray) -> ContractAddress {
     contract_address
 }
 
+pub const FELT_STRK_CONTRACT: felt252 =
+    0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d;
+
 #[test]
 fn test_list_nft_item() {
     let nft_address = deploy_nft_contract("MyNFT");
@@ -93,6 +96,55 @@ fn test_list_nft_item_state() {
             assert(listing.seller == 123.try_into().unwrap(), 'seller should be 123');
         },
     );
+}
+
+#[test]
+fn test_list_nft_item_two_items() {
+    let nft_address = deploy_nft_contract("MyNFT");
+    let marketplace_address = deploy_marketplace_contract("NFTMarketplace");
+
+    let caller: ContractAddress = 123.try_into().unwrap();
+    start_cheat_caller_address(nft_address, caller);
+    start_cheat_caller_address(marketplace_address, caller);
+
+    let nft = IMyNFTDispatcher { contract_address: nft_address };
+    nft.create_nft();
+
+    let erc721 = IERC721Dispatcher { contract_address: nft_address };
+    erc721.approve(marketplace_address, 1);
+
+    let mut spy = spy_events();
+
+    let marketplace = INFTMarketplaceDispatcher { contract_address: marketplace_address };
+    marketplace.list_item(nft_address, 1, 200);
+
+    spy
+        .assert_emitted(
+            @array![
+                (
+                    marketplace_address,
+                    NFTMarketplace::Event::ItemListed(
+                        ItemListed { seller: caller, nft_address, token_id: 1, price: 200 },
+                    ),
+                ),
+            ],
+        );
+
+    nft.create_nft();
+    erc721.approve(marketplace_address, 2);
+    marketplace.list_item(nft_address, 2, 100);
+
+    spy
+        .assert_emitted(
+            @array![
+                (
+                    marketplace_address,
+                    NFTMarketplace::Event::ItemListed(
+                        ItemListed { seller: caller, nft_address, token_id: 2, price: 100 },
+                    ),
+                ),
+            ],
+        );
 }
 
 #[test]
@@ -248,3 +300,23 @@ fn test_cancel_listing_state() {
         },
     );
 }
+// #[test]
+// fn test_buy_item() {
+//     let nft_address = deploy_nft_contract("MyNFT");
+//     let marketplace_address = deploy_marketplace_contract("NFTMarketplace");
+
+//     let caller: ContractAddress = 123.try_into().unwrap();
+//     start_cheat_caller_address(nft_address, caller);
+//     start_cheat_caller_address(marketplace_address, caller);
+
+//     let nft = IMyNFTDispatcher { contract_address: nft_address };
+//     nft.create_nft();
+
+//     let erc721 = IERC721Dispatcher { contract_address: nft_address };
+//     erc721.approve(marketplace_address, 1);
+
+//     let marketplace = INFTMarketplaceDispatcher { contract_address: marketplace_address };
+//     marketplace.list_item(nft_address, 1, 200);
+
+// }
+
