@@ -6,13 +6,18 @@ pub trait INFTMarketplace<TContractState> {
         ref self: TContractState, nft_address: ContractAddress, token_id: u256, price: u256,
     );
     fn cancel_listing(ref self: TContractState, nft_address: ContractAddress, token_id: u256);
-    fn buy_item(ref self: TContractState, token_id: u256);
+    fn buy_item(
+        ref self: TContractState, nft_address: ContractAddress, token_id: u256, data: Span<felt252>,
+    );
 }
 
 #[starknet::contract]
 pub mod NFTMarketplace {
+    use contracts::components::proceeds::{IProceeds, ProceedsComponent};
     use openzeppelin_security::ReentrancyGuardComponent;
+    use openzeppelin_token::erc20::interface::{IERC20Dispatcher, IERC20DispatcherTrait};
     use openzeppelin_token::erc721::interface::{IERC721Dispatcher, IERC721DispatcherTrait};
+    use starknet::event::EventEmitter;
     use starknet::storage::{
         Map, StoragePathEntry, StoragePointerReadAccess, StoragePointerWriteAccess,
     };
@@ -21,6 +26,7 @@ pub mod NFTMarketplace {
     component!(
         path: ReentrancyGuardComponent, storage: reentrancy_guard, event: ReentrancyGuardEvent,
     );
+    component!(path: ProceedsComponent, storage: proceeds, event: ProceedsEvent);
 
     pub const FELT_STRK_CONTRACT: felt252 =
         0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d;
@@ -78,6 +84,7 @@ pub mod NFTMarketplace {
         ItemBought: ItemBought,
         #[flat]
         ReentrancyGuardEvent: ReentrancyGuardComponent::Event,
+        ProceedsEvent: ProceedsComponent::Event,
     }
 
     #[derive(Drop, Serde, starknet::Store)]
@@ -89,7 +96,8 @@ pub mod NFTMarketplace {
     #[storage]
     struct Storage {
         s_listings: Map<ContractAddress, Map<u256, Listing>>,
-        s_proceeds: Map<ContractAddress, u256>,
+        #[substorage(v0)]
+        proceeds: ProceedsComponent::Storage,
         #[substorage(v0)]
         reentrancy_guard: ReentrancyGuardComponent::Storage,
     }
@@ -124,9 +132,33 @@ pub mod NFTMarketplace {
             self.emit(ItemCanceled { seller, nft_address, token_id });
         }
 
-        fn buy_item(ref self: ContractState, token_id: u256) {
+        fn buy_item(
+            ref self: ContractState,
+            nft_address: ContractAddress,
+            token_id: u256,
+            data: Span<felt252>,
+        ) {
+            self._is_listed(nft_address, token_id);
             self.reentrancy_guard.start();
-            // TODO: Revisit when it's clear how to process BTC payments
+
+            let buyer = get_caller_address();
+            let strk_contract_address = FELT_STRK_CONTRACT.try_into().unwrap();
+            let strk_dispatcher = IERC20Dispatcher { contract_address: strk_contract_address };
+            let user_balance = strk_dispatcher.balance_of(buyer);
+            let listed_item = self._get_listing(nft_address, token_id);
+
+            assert(user_balance > listed_item.price, Errors::PRICE_NOT_MET);
+
+            strk_dispatcher.transfer(get_contract_address(), listed_item.price);
+
+            self.proceeds.increment(listed_item.seller, listed_item.price);
+
+            self._remove_listing(nft_address, token_id);
+
+            let nft_dispatcher = IERC721Dispatcher { contract_address: nft_address };
+            nft_dispatcher.safe_transfer_from(listed_item.seller, buyer, token_id, data);
+
+            self.emit(ItemBought { buyer, nft_address, token_id, price: listed_item.price });
 
             self.reentrancy_guard.end();
         }
@@ -169,6 +201,14 @@ pub mod NFTMarketplace {
             ref self: ContractState, nft_address: ContractAddress, token_id: u256,
         ) -> Listing {
             self.s_listings.entry(nft_address).entry(token_id).read()
+        }
+
+        fn _remove_listing(ref self: ContractState, nft_address: ContractAddress, token_id: u256) {
+            self
+                .s_listings
+                .entry(nft_address)
+                .entry(token_id)
+                .write(Listing { price: 0, seller: 0.try_into().unwrap() });
         }
     }
 }
