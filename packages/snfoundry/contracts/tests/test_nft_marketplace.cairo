@@ -378,3 +378,53 @@ fn test_buy_item() {
         );
 }
 
+// Test requires slight modification to NFTMarketplace.withdraw_proceeds to run.
+// It requires the contract address of the erc20 token to be passed into the function.
+// TODO: Refactor when test setup is better.
+#[test]
+fn test_withdraw_proceeds() {
+    // Credit buyer with enough STRK tokens
+    let token_address = deploy_erc_20_contract();
+
+    let seller: ContractAddress = 123.try_into().unwrap();
+    let buyer: ContractAddress = 456.try_into().unwrap();
+
+    // start_cheat_account_contract_address(token_address, FELT_STRK_CONTRACT.try_into().unwrap());
+    start_cheat_caller_address(token_address, TOKEN_OWNER.try_into().unwrap());
+    let erc20_disptcher = IERC20Dispatcher { contract_address: token_address };
+    erc20_disptcher.transfer(buyer, 500);
+    stop_cheat_caller_address(token_address);
+
+    let nft_address = deploy_nft_contract("MyNFT");
+    let marketplace_address = deploy_marketplace_contract("NFTMarketplace");
+
+    // Create NFT and list on Marketplace
+    start_cheat_caller_address(nft_address, seller);
+    start_cheat_caller_address(marketplace_address, seller);
+
+    let nft = IMyNFTDispatcher { contract_address: nft_address };
+    nft.create_nft();
+
+    let erc721 = IERC721Dispatcher { contract_address: nft_address };
+    erc721.approve(marketplace_address, 1);
+
+    let marketplace = INFTMarketplaceDispatcher { contract_address: marketplace_address };
+    marketplace.list_item(nft_address, 1, 200);
+    stop_cheat_caller_address(marketplace_address);
+    stop_cheat_caller_address(nft_address);
+
+    // Purchase listed NFT with buyer account
+    start_cheat_account_contract_address(token_address, FELT_STRK_CONTRACT.try_into().unwrap());
+    start_cheat_caller_address(marketplace_address, buyer);
+    cheat_caller_address(token_address, buyer, CheatSpan::TargetCalls(1));
+    erc20_disptcher.approve(marketplace_address, 200);
+
+    marketplace.buy_item(nft_address, 1, [].span(), token_address);
+    stop_cheat_caller_address(marketplace_address);
+
+    start_cheat_caller_address(marketplace_address, seller);
+    marketplace.withdraw_proceeds(token_address);
+
+    let seller_new_balance = erc20_disptcher.balance_of(seller);
+    assert(seller_new_balance == 200, 'seller balance not correct');
+}
