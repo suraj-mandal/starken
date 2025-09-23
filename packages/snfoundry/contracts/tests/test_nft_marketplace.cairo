@@ -314,7 +314,6 @@ fn test_cancel_listing_state() {
         },
     );
 }
-
 // Test requires slight modification to NFTMarketplace.buy_item to run.
 // It requires the contract address of the erc20 token to be passed into the function.
 // TODO: Refactor when test setup is better.
@@ -326,7 +325,8 @@ fn test_cancel_listing_state() {
 //     let seller: ContractAddress = 123.try_into().unwrap();
 //     let buyer: ContractAddress = 456.try_into().unwrap();
 
-//     // start_cheat_account_contract_address(token_address, FELT_STRK_CONTRACT.try_into().unwrap());
+//     // start_cheat_account_contract_address(token_address,
+//     FELT_STRK_CONTRACT.try_into().unwrap());
 //     start_cheat_caller_address(token_address, TOKEN_OWNER.try_into().unwrap());
 //     let erc20_disptcher = IERC20Dispatcher { contract_address: token_address };
 //     erc20_disptcher.transfer(buyer, 500);
@@ -389,7 +389,8 @@ fn test_cancel_listing_state() {
 //     let seller: ContractAddress = 123.try_into().unwrap();
 //     let buyer: ContractAddress = 456.try_into().unwrap();
 
-//     // start_cheat_account_contract_address(token_address, FELT_STRK_CONTRACT.try_into().unwrap());
+//     // start_cheat_account_contract_address(token_address,
+//     FELT_STRK_CONTRACT.try_into().unwrap());
 //     start_cheat_caller_address(token_address, TOKEN_OWNER.try_into().unwrap());
 //     let erc20_disptcher = IERC20Dispatcher { contract_address: token_address };
 //     erc20_disptcher.transfer(buyer, 500);
@@ -428,3 +429,4 @@ fn test_cancel_listing_state() {
 //     let seller_new_balance = erc20_disptcher.balance_of(seller);
 //     assert(seller_new_balance == 200, 'seller balance not correct');
 // }
+
