@@ -15,7 +15,8 @@ pub fn deploy_nft_contract(name: ByteArray) -> ContractAddress {
         0, 0x4e4654, 3, // 'NFT'
         0,
         0x68747470733a2f2f6170692e6578616d706c652e636f6d2f76312f,
-        27 // 'https://api.example.com/v1/'
+        27, // 'https://api.example.com/v1/'
+        0x4b3f4ba8c00a02b66142a4b1dd41a4dfab4f92650922a3280977b0f03c75ee1,
     ];
     let (contract_address, _) = contract.deploy(@constructor_data).unwrap();
     contract_address

@@ -5,14 +5,33 @@
 
 const deployedContracts = {
   devnet: {
-    YourContract: {
+    MyNFT: {
       address:
-        "0x79949c15b98484e4e4a48b066d1e025d678d9fc6e6c3cfd68b3d685d7a81c51",
+        "0x7e87e0633b572c3e03660a30a38e4c6bce4fabfd385f4cdca643def11ddbaab",
       abi: [
         {
           type: "impl",
-          name: "YourContractImpl",
-          interface_name: "contracts::your_contract::IYourContract",
+          name: "MyNFTImpl",
+          interface_name: "contracts::nft::IMyNFT",
+        },
+        {
+          type: "interface",
+          name: "contracts::nft::IMyNFT",
+          items: [
+            {
+              type: "function",
+              name: "create_nft",
+              inputs: [],
+              outputs: [],
+              state_mutability: "external",
+            },
+          ],
+        },
+        {
+          type: "impl",
+          name: "WrappedIERC721MetadataImpl",
+          interface_name:
+            "openzeppelin_token::erc721::interface::IERC721Metadata",
         },
         {
           type: "struct",
@@ -47,40 +66,12 @@ const deployedContracts = {
           ],
         },
         {
-          type: "enum",
-          name: "core::option::Option::<core::integer::u256>",
-          variants: [
-            {
-              name: "Some",
-              type: "core::integer::u256",
-            },
-            {
-              name: "None",
-              type: "()",
-            },
-          ],
-        },
-        {
-          type: "enum",
-          name: "core::bool",
-          variants: [
-            {
-              name: "False",
-              type: "()",
-            },
-            {
-              name: "True",
-              type: "()",
-            },
-          ],
-        },
-        {
           type: "interface",
-          name: "contracts::your_contract::IYourContract",
+          name: "openzeppelin_token::erc721::interface::IERC721Metadata",
           items: [
             {
               type: "function",
-              name: "greeting",
+              name: "name",
               inputs: [],
               outputs: [
                 {
@@ -91,34 +82,27 @@ const deployedContracts = {
             },
             {
               type: "function",
-              name: "set_greeting",
-              inputs: [
-                {
-                  name: "new_greeting",
-                  type: "core::byte_array::ByteArray",
-                },
-                {
-                  name: "amount_strk",
-                  type: "core::option::Option::<core::integer::u256>",
-                },
-              ],
-              outputs: [],
-              state_mutability: "external",
-            },
-            {
-              type: "function",
-              name: "withdraw",
-              inputs: [],
-              outputs: [],
-              state_mutability: "external",
-            },
-            {
-              type: "function",
-              name: "premium",
+              name: "symbol",
               inputs: [],
               outputs: [
                 {
-                  type: "core::bool",
+                  type: "core::byte_array::ByteArray",
+                },
+              ],
+              state_mutability: "view",
+            },
+            {
+              type: "function",
+              name: "token_uri",
+              inputs: [
+                {
+                  name: "token_id",
+                  type: "core::integer::u256",
+                },
+              ],
+              outputs: [
+                {
+                  type: "core::byte_array::ByteArray",
                 },
               ],
               state_mutability: "view",
@@ -167,14 +151,421 @@ const deployedContracts = {
           ],
         },
         {
+          type: "impl",
+          name: "CounterImpl",
+          interface_name: "contracts::components::counter::ICounter",
+        },
+        {
+          type: "interface",
+          name: "contracts::components::counter::ICounter",
+          items: [
+            {
+              type: "function",
+              name: "current",
+              inputs: [],
+              outputs: [
+                {
+                  type: "core::integer::u256",
+                },
+              ],
+              state_mutability: "view",
+            },
+            {
+              type: "function",
+              name: "increment",
+              inputs: [],
+              outputs: [],
+              state_mutability: "external",
+            },
+            {
+              type: "function",
+              name: "decrement",
+              inputs: [],
+              outputs: [],
+              state_mutability: "external",
+            },
+          ],
+        },
+        {
+          type: "impl",
+          name: "ERC721Impl",
+          interface_name: "openzeppelin_token::erc721::interface::IERC721",
+        },
+        {
+          type: "struct",
+          name: "core::array::Span::<core::felt252>",
+          members: [
+            {
+              name: "snapshot",
+              type: "@core::array::Array::<core::felt252>",
+            },
+          ],
+        },
+        {
+          type: "enum",
+          name: "core::bool",
+          variants: [
+            {
+              name: "False",
+              type: "()",
+            },
+            {
+              name: "True",
+              type: "()",
+            },
+          ],
+        },
+        {
+          type: "interface",
+          name: "openzeppelin_token::erc721::interface::IERC721",
+          items: [
+            {
+              type: "function",
+              name: "balance_of",
+              inputs: [
+                {
+                  name: "account",
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+              ],
+              outputs: [
+                {
+                  type: "core::integer::u256",
+                },
+              ],
+              state_mutability: "view",
+            },
+            {
+              type: "function",
+              name: "owner_of",
+              inputs: [
+                {
+                  name: "token_id",
+                  type: "core::integer::u256",
+                },
+              ],
+              outputs: [
+                {
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+              ],
+              state_mutability: "view",
+            },
+            {
+              type: "function",
+              name: "safe_transfer_from",
+              inputs: [
+                {
+                  name: "from",
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+                {
+                  name: "to",
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+                {
+                  name: "token_id",
+                  type: "core::integer::u256",
+                },
+                {
+                  name: "data",
+                  type: "core::array::Span::<core::felt252>",
+                },
+              ],
+              outputs: [],
+              state_mutability: "external",
+            },
+            {
+              type: "function",
+              name: "transfer_from",
+              inputs: [
+                {
+                  name: "from",
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+                {
+                  name: "to",
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+                {
+                  name: "token_id",
+                  type: "core::integer::u256",
+                },
+              ],
+              outputs: [],
+              state_mutability: "external",
+            },
+            {
+              type: "function",
+              name: "approve",
+              inputs: [
+                {
+                  name: "to",
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+                {
+                  name: "token_id",
+                  type: "core::integer::u256",
+                },
+              ],
+              outputs: [],
+              state_mutability: "external",
+            },
+            {
+              type: "function",
+              name: "set_approval_for_all",
+              inputs: [
+                {
+                  name: "operator",
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+                {
+                  name: "approved",
+                  type: "core::bool",
+                },
+              ],
+              outputs: [],
+              state_mutability: "external",
+            },
+            {
+              type: "function",
+              name: "get_approved",
+              inputs: [
+                {
+                  name: "token_id",
+                  type: "core::integer::u256",
+                },
+              ],
+              outputs: [
+                {
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+              ],
+              state_mutability: "view",
+            },
+            {
+              type: "function",
+              name: "is_approved_for_all",
+              inputs: [
+                {
+                  name: "owner",
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+                {
+                  name: "operator",
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+              ],
+              outputs: [
+                {
+                  type: "core::bool",
+                },
+              ],
+              state_mutability: "view",
+            },
+          ],
+        },
+        {
+          type: "impl",
+          name: "SRC5Impl",
+          interface_name: "openzeppelin_introspection::interface::ISRC5",
+        },
+        {
+          type: "interface",
+          name: "openzeppelin_introspection::interface::ISRC5",
+          items: [
+            {
+              type: "function",
+              name: "supports_interface",
+              inputs: [
+                {
+                  name: "interface_id",
+                  type: "core::felt252",
+                },
+              ],
+              outputs: [
+                {
+                  type: "core::bool",
+                },
+              ],
+              state_mutability: "view",
+            },
+          ],
+        },
+        {
+          type: "impl",
+          name: "ERC721EnumerableImpl",
+          interface_name:
+            "openzeppelin_token::erc721::extensions::erc721_enumerable::interface::IERC721Enumerable",
+        },
+        {
+          type: "interface",
+          name: "openzeppelin_token::erc721::extensions::erc721_enumerable::interface::IERC721Enumerable",
+          items: [
+            {
+              type: "function",
+              name: "total_supply",
+              inputs: [],
+              outputs: [
+                {
+                  type: "core::integer::u256",
+                },
+              ],
+              state_mutability: "view",
+            },
+            {
+              type: "function",
+              name: "token_by_index",
+              inputs: [
+                {
+                  name: "index",
+                  type: "core::integer::u256",
+                },
+              ],
+              outputs: [
+                {
+                  type: "core::integer::u256",
+                },
+              ],
+              state_mutability: "view",
+            },
+            {
+              type: "function",
+              name: "token_of_owner_by_index",
+              inputs: [
+                {
+                  name: "owner",
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+                {
+                  name: "index",
+                  type: "core::integer::u256",
+                },
+              ],
+              outputs: [
+                {
+                  type: "core::integer::u256",
+                },
+              ],
+              state_mutability: "view",
+            },
+          ],
+        },
+        {
           type: "constructor",
           name: "constructor",
           inputs: [
+            {
+              name: "name",
+              type: "core::byte_array::ByteArray",
+            },
+            {
+              name: "symbol",
+              type: "core::byte_array::ByteArray",
+            },
+            {
+              name: "base_uri",
+              type: "core::byte_array::ByteArray",
+            },
             {
               name: "owner",
               type: "core::starknet::contract_address::ContractAddress",
             },
           ],
+        },
+        {
+          type: "event",
+          name: "openzeppelin_token::erc721::erc721::ERC721Component::Transfer",
+          kind: "struct",
+          members: [
+            {
+              name: "from",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "key",
+            },
+            {
+              name: "to",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "key",
+            },
+            {
+              name: "token_id",
+              type: "core::integer::u256",
+              kind: "key",
+            },
+          ],
+        },
+        {
+          type: "event",
+          name: "openzeppelin_token::erc721::erc721::ERC721Component::Approval",
+          kind: "struct",
+          members: [
+            {
+              name: "owner",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "key",
+            },
+            {
+              name: "approved",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "key",
+            },
+            {
+              name: "token_id",
+              type: "core::integer::u256",
+              kind: "key",
+            },
+          ],
+        },
+        {
+          type: "event",
+          name: "openzeppelin_token::erc721::erc721::ERC721Component::ApprovalForAll",
+          kind: "struct",
+          members: [
+            {
+              name: "owner",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "key",
+            },
+            {
+              name: "operator",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "key",
+            },
+            {
+              name: "approved",
+              type: "core::bool",
+              kind: "data",
+            },
+          ],
+        },
+        {
+          type: "event",
+          name: "openzeppelin_token::erc721::erc721::ERC721Component::Event",
+          kind: "enum",
+          variants: [
+            {
+              name: "Transfer",
+              type: "openzeppelin_token::erc721::erc721::ERC721Component::Transfer",
+              kind: "nested",
+            },
+            {
+              name: "Approval",
+              type: "openzeppelin_token::erc721::erc721::ERC721Component::Approval",
+              kind: "nested",
+            },
+            {
+              name: "ApprovalForAll",
+              type: "openzeppelin_token::erc721::erc721::ERC721Component::ApprovalForAll",
+              kind: "nested",
+            },
+          ],
+        },
+        {
+          type: "event",
+          name: "openzeppelin_introspection::src5::SRC5Component::Event",
+          kind: "enum",
+          variants: [],
         },
         {
           type: "event",
@@ -229,51 +620,358 @@ const deployedContracts = {
         },
         {
           type: "event",
-          name: "contracts::your_contract::YourContract::GreetingChanged",
-          kind: "struct",
-          members: [
-            {
-              name: "greeting_setter",
-              type: "core::starknet::contract_address::ContractAddress",
-              kind: "key",
-            },
-            {
-              name: "new_greeting",
-              type: "core::byte_array::ByteArray",
-              kind: "key",
-            },
-            {
-              name: "premium",
-              type: "core::bool",
-              kind: "data",
-            },
-            {
-              name: "value",
-              type: "core::option::Option::<core::integer::u256>",
-              kind: "data",
-            },
-          ],
+          name: "contracts::components::counter::CounterComponent::Event",
+          kind: "enum",
+          variants: [],
         },
         {
           type: "event",
-          name: "contracts::your_contract::YourContract::Event",
+          name: "openzeppelin_token::erc721::extensions::erc721_enumerable::erc721_enumerable::ERC721EnumerableComponent::Event",
+          kind: "enum",
+          variants: [],
+        },
+        {
+          type: "event",
+          name: "contracts::nft::MyNFT::Event",
           kind: "enum",
           variants: [
+            {
+              name: "ERC721Event",
+              type: "openzeppelin_token::erc721::erc721::ERC721Component::Event",
+              kind: "flat",
+            },
+            {
+              name: "SRC5Event",
+              type: "openzeppelin_introspection::src5::SRC5Component::Event",
+              kind: "flat",
+            },
             {
               name: "OwnableEvent",
               type: "openzeppelin_access::ownable::ownable::OwnableComponent::Event",
               kind: "flat",
             },
             {
-              name: "GreetingChanged",
-              type: "contracts::your_contract::YourContract::GreetingChanged",
+              name: "CounterEvent",
+              type: "contracts::components::counter::CounterComponent::Event",
+              kind: "nested",
+            },
+            {
+              name: "EnumerableEvent",
+              type: "openzeppelin_token::erc721::extensions::erc721_enumerable::erc721_enumerable::ERC721EnumerableComponent::Event",
               kind: "nested",
             },
           ],
         },
       ],
       classHash:
-        "0x21e2aa81952de7b6851d5e76ea1f70283373407b22bfb4d32fafa4c5e2c8f1d",
+        "0x59685f5aeb0422911c1a094a9511919bde696a39c3df69d9bd0f8bfb202df29",
+    },
+    NFTMarketplace: {
+      address:
+        "0x7b47f793aee816334470ac0ba7ff661418616f2c6bc74cde5cf6f214c7b1a21",
+      abi: [
+        {
+          type: "impl",
+          name: "NFTMarketplaceImpl",
+          interface_name: "contracts::nft_marketplace::INFTMarketplace",
+        },
+        {
+          type: "struct",
+          name: "core::integer::u256",
+          members: [
+            {
+              name: "low",
+              type: "core::integer::u128",
+            },
+            {
+              name: "high",
+              type: "core::integer::u128",
+            },
+          ],
+        },
+        {
+          type: "struct",
+          name: "contracts::components::listings::Listing",
+          members: [
+            {
+              name: "price",
+              type: "core::integer::u256",
+            },
+            {
+              name: "seller",
+              type: "core::starknet::contract_address::ContractAddress",
+            },
+          ],
+        },
+        {
+          type: "struct",
+          name: "core::array::Span::<core::felt252>",
+          members: [
+            {
+              name: "snapshot",
+              type: "@core::array::Array::<core::felt252>",
+            },
+          ],
+        },
+        {
+          type: "interface",
+          name: "contracts::nft_marketplace::INFTMarketplace",
+          items: [
+            {
+              type: "function",
+              name: "list_item",
+              inputs: [
+                {
+                  name: "nft_address",
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+                {
+                  name: "token_id",
+                  type: "core::integer::u256",
+                },
+                {
+                  name: "price",
+                  type: "core::integer::u256",
+                },
+              ],
+              outputs: [],
+              state_mutability: "external",
+            },
+            {
+              type: "function",
+              name: "get_listing",
+              inputs: [
+                {
+                  name: "nft_address",
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+                {
+                  name: "token_id",
+                  type: "core::integer::u256",
+                },
+              ],
+              outputs: [
+                {
+                  type: "contracts::components::listings::Listing",
+                },
+              ],
+              state_mutability: "view",
+            },
+            {
+              type: "function",
+              name: "update_listing",
+              inputs: [
+                {
+                  name: "nft_address",
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+                {
+                  name: "token_id",
+                  type: "core::integer::u256",
+                },
+                {
+                  name: "new_price",
+                  type: "core::integer::u256",
+                },
+              ],
+              outputs: [],
+              state_mutability: "external",
+            },
+            {
+              type: "function",
+              name: "cancel_listing",
+              inputs: [
+                {
+                  name: "nft_address",
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+                {
+                  name: "token_id",
+                  type: "core::integer::u256",
+                },
+              ],
+              outputs: [],
+              state_mutability: "external",
+            },
+            {
+              type: "function",
+              name: "buy_item",
+              inputs: [
+                {
+                  name: "nft_address",
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+                {
+                  name: "token_id",
+                  type: "core::integer::u256",
+                },
+                {
+                  name: "data",
+                  type: "core::array::Span::<core::felt252>",
+                },
+              ],
+              outputs: [],
+              state_mutability: "external",
+            },
+            {
+              type: "function",
+              name: "get_proceeds",
+              inputs: [
+                {
+                  name: "seller_address",
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+              ],
+              outputs: [
+                {
+                  type: "core::integer::u256",
+                },
+              ],
+              state_mutability: "view",
+            },
+            {
+              type: "function",
+              name: "withdraw_proceeds",
+              inputs: [],
+              outputs: [],
+              state_mutability: "external",
+            },
+          ],
+        },
+        {
+          type: "event",
+          name: "contracts::nft_marketplace::NFTMarketplace::ItemListed",
+          kind: "struct",
+          members: [
+            {
+              name: "seller",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "key",
+            },
+            {
+              name: "nft_address",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "key",
+            },
+            {
+              name: "token_id",
+              type: "core::integer::u256",
+              kind: "key",
+            },
+            {
+              name: "price",
+              type: "core::integer::u256",
+              kind: "data",
+            },
+          ],
+        },
+        {
+          type: "event",
+          name: "contracts::nft_marketplace::NFTMarketplace::ItemCanceled",
+          kind: "struct",
+          members: [
+            {
+              name: "seller",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "key",
+            },
+            {
+              name: "nft_address",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "key",
+            },
+            {
+              name: "token_id",
+              type: "core::integer::u256",
+              kind: "key",
+            },
+          ],
+        },
+        {
+          type: "event",
+          name: "contracts::nft_marketplace::NFTMarketplace::ItemBought",
+          kind: "struct",
+          members: [
+            {
+              name: "buyer",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "key",
+            },
+            {
+              name: "nft_address",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "key",
+            },
+            {
+              name: "token_id",
+              type: "core::integer::u256",
+              kind: "key",
+            },
+            {
+              name: "price",
+              type: "core::integer::u256",
+              kind: "data",
+            },
+          ],
+        },
+        {
+          type: "event",
+          name: "openzeppelin_security::reentrancyguard::ReentrancyGuardComponent::Event",
+          kind: "enum",
+          variants: [],
+        },
+        {
+          type: "event",
+          name: "contracts::components::proceeds::ProceedsComponent::Event",
+          kind: "enum",
+          variants: [],
+        },
+        {
+          type: "event",
+          name: "contracts::components::listings::ListingsComponent::Event",
+          kind: "enum",
+          variants: [],
+        },
+        {
+          type: "event",
+          name: "contracts::nft_marketplace::NFTMarketplace::Event",
+          kind: "enum",
+          variants: [
+            {
+              name: "ItemListed",
+              type: "contracts::nft_marketplace::NFTMarketplace::ItemListed",
+              kind: "nested",
+            },
+            {
+              name: "ItemCanceled",
+              type: "contracts::nft_marketplace::NFTMarketplace::ItemCanceled",
+              kind: "nested",
+            },
+            {
+              name: "ItemBought",
+              type: "contracts::nft_marketplace::NFTMarketplace::ItemBought",
+              kind: "nested",
+            },
+            {
+              name: "ReentrancyGuardEvent",
+              type: "openzeppelin_security::reentrancyguard::ReentrancyGuardComponent::Event",
+              kind: "flat",
+            },
+            {
+              name: "ProceedsEvent",
+              type: "contracts::components::proceeds::ProceedsComponent::Event",
+              kind: "nested",
+            },
+            {
+              name: "ListingsEvent",
+              type: "contracts::components::listings::ListingsComponent::Event",
+              kind: "nested",
+            },
+          ],
+        },
+      ],
+      classHash:
+        "0x1d62c0374e415aaaf31f8d98534f57fa8ded1628569bc38e74d77dc41273c87",
     },
   },
 } as const;
