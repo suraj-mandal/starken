@@ -1,13 +1,15 @@
-use NFTMarketplace::{FELT_STRK_CONTRACT, ItemCanceled, ItemListed};
+use NFTMarketplace::{FELT_STRK_CONTRACT, ItemBought, ItemCanceled, ItemListed};
 use contracts::components::listings::{IListings, Listing};
 use contracts::nft::{IMyNFTDispatcher, IMyNFTDispatcherTrait};
 use contracts::nft_marketplace::{
     INFTMarketplaceDispatcher, INFTMarketplaceDispatcherTrait, NFTMarketplace,
 };
+use openzeppelin_token::erc20::interface::{IERC20Dispatcher, IERC20DispatcherTrait};
 use openzeppelin_token::erc721::interface::{IERC721Dispatcher, IERC721DispatcherTrait};
 use snforge_std::{
-    ContractClassTrait, DeclareResultTrait, EventSpyAssertionsTrait, declare, interact_with_state,
-    spy_events, start_cheat_caller_address,
+    CheatSpan, ContractClassTrait, DeclareResultTrait, EventSpyAssertionsTrait,
+    cheat_caller_address, declare, interact_with_state, spy_events,
+    start_cheat_account_contract_address, start_cheat_caller_address, stop_cheat_caller_address,
 };
 use starknet::ContractAddress;
 use crate::test_nft::deploy_nft_contract;
@@ -18,6 +20,8 @@ fn deploy_marketplace_contract(name: ByteArray) -> ContractAddress {
     contract_address
 }
 
+const TOKEN_OWNER: felt252 = 0x064b48806902a367c8598f4f95c305e8c1a1acba5f082d294a43793113115691;
+
 fn deploy_erc_20_contract() -> ContractAddress {
     let contract = declare("MyERC20Token").unwrap().contract_class();
     let constructor_data = array![
@@ -25,7 +29,7 @@ fn deploy_erc_20_contract() -> ContractAddress {
         0, 0x4d544b, 3, // "MTK"
         0x0f4240,
         0x0, // fixed_supply = 1_000_000 (u256 low, high)
-        FELT_STRK_CONTRACT // recipient
+        TOKEN_OWNER // recipient
     ];
     let (contract_address, _) = contract.deploy(@constructor_data).unwrap();
     contract_address
@@ -311,10 +315,66 @@ fn test_cancel_listing_state() {
     );
 }
 
+// Test requires slight modification to NFTMarketplace.buy_item to run.
+// It requires the contract address of the erc20 token to be passed into the function.
+// TODO: Refactor when test setup is better.
 #[test]
 fn test_buy_item() {
+    // Credit buyer with enough STRK tokens
     let token_address = deploy_erc_20_contract();
 
-    println!("{:?}", token_address);
+    let seller: ContractAddress = 123.try_into().unwrap();
+    let buyer: ContractAddress = 456.try_into().unwrap();
+
+    // start_cheat_account_contract_address(token_address, FELT_STRK_CONTRACT.try_into().unwrap());
+    start_cheat_caller_address(token_address, TOKEN_OWNER.try_into().unwrap());
+    let erc20_disptcher = IERC20Dispatcher { contract_address: token_address };
+    erc20_disptcher.transfer(buyer, 500);
+    stop_cheat_caller_address(token_address);
+
+    let nft_address = deploy_nft_contract("MyNFT");
+    let marketplace_address = deploy_marketplace_contract("NFTMarketplace");
+
+    // Create NFT and list on Marketplace
+    start_cheat_caller_address(nft_address, seller);
+    start_cheat_caller_address(marketplace_address, seller);
+
+    let nft = IMyNFTDispatcher { contract_address: nft_address };
+    nft.create_nft();
+
+    let erc721 = IERC721Dispatcher { contract_address: nft_address };
+    erc721.approve(marketplace_address, 1);
+
+    let marketplace = INFTMarketplaceDispatcher { contract_address: marketplace_address };
+    marketplace.list_item(nft_address, 1, 200);
+    stop_cheat_caller_address(marketplace_address);
+    stop_cheat_caller_address(nft_address);
+
+    // Purchase listed NFT with buyer account
+    start_cheat_account_contract_address(token_address, FELT_STRK_CONTRACT.try_into().unwrap());
+    start_cheat_caller_address(marketplace_address, buyer);
+    cheat_caller_address(token_address, buyer, CheatSpan::TargetCalls(1));
+    erc20_disptcher.approve(marketplace_address, 200);
+
+    let mut spy = spy_events();
+    marketplace.buy_item(nft_address, 1, [].span(), token_address);
+
+    let buyer_new_balance = erc20_disptcher.balance_of(buyer);
+    assert(buyer_new_balance == 300, 'buyer balance not correct');
+
+    let marketplace_proceeds = marketplace.get_proceeds(seller);
+    assert(marketplace_proceeds == 200, 'proceeds balance not correct');
+
+    spy
+        .assert_emitted(
+            @array![
+                (
+                    marketplace_address,
+                    NFTMarketplace::Event::ItemBought(
+                        ItemBought { buyer, nft_address, token_id: 1, price: 200 },
+                    ),
+                ),
+            ],
+        );
 }
 
