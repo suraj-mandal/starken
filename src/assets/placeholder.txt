@@ -1,0 +1,2 @@
+// src/assets/placeholder.txt
+This folder is for images, icons, and other static assets used in the Starken NFT Marketplace project.
