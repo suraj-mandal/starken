@@ -1,6 +1,6 @@
 # STARKEN
 
-#### [Demo]() | [Pitchdeck]() | [Demo video]()
+#### [Demo]() | [Pitchdeck](https://drive.google.com/file/d/1HT3tHA88VwVi1LA3ODM_uvip4t8CTWr5/view?usp=sharing) | [Demo video]()
 
 ## Background
 
