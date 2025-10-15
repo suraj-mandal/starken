@@ -51,7 +51,8 @@ const deployScript = async (): Promise<void> => {
       name: "MyNFT",
       symbol: "NFT",
       base_uri: "https://api.example.com/v1/",
-      owner: "0x064b48806902a367c8598f4f95c305e8c1a1acba5f082d294a43793113115691",
+      owner:
+        "0x064b48806902a367c8598f4f95c305e8c1a1acba5f082d294a43793113115691",
     },
   });
 

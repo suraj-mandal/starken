@@ -2,7 +2,7 @@
 interface XverseProvider {
   request: <Method extends string>(
     method: Method,
-    params?: any
+    params?: any,
   ) => Promise<any>;
   on?: (event: string, handler: (...args: any[]) => void) => void;
   removeListener?: (event: string, handler: (...args: any[]) => void) => void;
@@ -43,7 +43,9 @@ export const getXverseFromWindow: () => Promise<
         event.target &&
         (event.target as Document).readyState === "complete"
       ) {
-        resolve(window.XverseProviders?.BitcoinProvider || window.BitcoinProvider);
+        resolve(
+          window.XverseProviders?.BitcoinProvider || window.BitcoinProvider,
+        );
         document.removeEventListener("readystatechange", documentStateChange);
       }
     };

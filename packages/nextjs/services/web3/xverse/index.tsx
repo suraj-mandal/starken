@@ -13,7 +13,7 @@ import { xverseWalletIcon, xverseWalletId, xverseWalletName } from "./consts";
 interface XverseProvider {
   request: <Method extends string>(
     method: Method,
-    params?: any
+    params?: any,
   ) => Promise<any>;
   on?: (event: string, handler: (...args: any[]) => void) => void;
   removeListener?: (event: string, handler: (...args: any[]) => void) => void;
@@ -102,7 +102,7 @@ export class XverseConnector extends InjectedConnector {
       this.__addresses = addresses;
       // Use the payment address as the main account
       const paymentAddress = addresses.find(
-        (addr: XverseAddress) => addr.purpose === "payment"
+        (addr: XverseAddress) => addr.purpose === "payment",
       );
 
       if (!paymentAddress) {
@@ -139,7 +139,10 @@ export class XverseConnector extends InjectedConnector {
 
     // Clean up listeners
     if (this.__wallet.removeListener) {
-      this.__wallet.removeListener("accountsChanged", this._handleAccountsChanged);
+      this.__wallet.removeListener(
+        "accountsChanged",
+        this._handleAccountsChanged,
+      );
       this.__wallet.removeListener("disconnect", this._handleDisconnect);
     }
 
