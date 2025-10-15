@@ -1,0 +1,3 @@
+This is the application on the starknet platform that I am working on. Carefully check through the README.md stuff and everything. Once done let me know. I will then ask you to implement simple stuff.
+
+I have installed the xverse wallet sdk, atomiq labs sdk, atomiq labs starknet integration as well. You can check in the node_modules. I want you to look into those libraries as well. Because when I ask you to implement the code, you might need to have access to these libraries as well. Analyze it carefully and let me know once done.
