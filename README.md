@@ -1,6 +1,6 @@
 # STARKEN
 
-#### [Demo]() | [Pitchdeck](https://drive.google.com/file/d/17VyWLW5nHRAjxJPZ4G-sC1vvaEz3aKSv/view?usp=sharing) | [Demo video]()
+#### [Demo](https://starken-r92tjpil5-surajmandals-projects.vercel.app/) | [Pitchdeck](https://drive.google.com/file/d/17VyWLW5nHRAjxJPZ4G-sC1vvaEz3aKSv/view?usp=sharing) | [Demo video](https://youtu.be/M9LVRn6zUjs)
 
 ## Background
 
