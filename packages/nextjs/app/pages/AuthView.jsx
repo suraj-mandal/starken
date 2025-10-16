@@ -1,38 +1,48 @@
-'use client';
+"use client";
 
-import React, {useState} from 'react';
-import StarkenLogo from '../../components/StarkenLogo';
+import React, { useState } from "react";
+import StarkenLogo from "../../components/StarkenLogo";
 
-const AuthView = ({onAuth}) => {
-  const [authView, setAuthView] = useState('login'); // 'login', 'signup', 'forgot'
+const AuthView = ({ onAuth }) => {
+  const [authView, setAuthView] = useState("login"); // 'login', 'signup', 'forgot'
   const [showPassword, setShowPassword] = useState(false);
-  const [loginData, setLoginData] = useState({email: '', password: ''});
-  const [signupData, setSignupData] = useState({name: '', email: '', password: '', confirmPassword: ''});
-  const [forgotEmail, setForgotEmail] = useState('');
+  const [loginData, setLoginData] = useState({ email: "", password: "" });
+  const [signupData, setSignupData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+  const [forgotEmail, setForgotEmail] = useState("");
 
   const handleLogin = (e) => {
     e.preventDefault();
     if (loginData.email && loginData.password) {
       onAuth();
-      setLoginData({email: '', password: ''});
-      alert('Login successful!');
+      setLoginData({ email: "", password: "" });
+      alert("Login successful!");
     } else {
-      alert('Please fill in all fields');
+      alert("Please fill in all fields");
     }
   };
 
   const handleSignup = (e) => {
     e.preventDefault();
-    if (signupData.name && signupData.email && signupData.password && signupData.confirmPassword) {
+    if (
+      signupData.name &&
+      signupData.email &&
+      signupData.password &&
+      signupData.confirmPassword
+    ) {
       if (signupData.password !== signupData.confirmPassword) {
-        alert('Passwords do not match!');
+        alert("Passwords do not match!");
         return;
       }
       onAuth();
-      setSignupData({name: '', email: '', password: '', confirmPassword: ''});
-      alert('Account created successfully!');
+      setSignupData({ name: "", email: "", password: "", confirmPassword: "" });
+      alert("Account created successfully!");
     } else {
-      alert('Please fill in all fields');
+      alert("Please fill in all fields");
     }
   };
 
@@ -40,10 +50,10 @@ const AuthView = ({onAuth}) => {
     e.preventDefault();
     if (forgotEmail) {
       alert(`Password reset link sent to ${forgotEmail}`);
-      setForgotEmail('');
-      setAuthView('login');
+      setForgotEmail("");
+      setAuthView("login");
     } else {
-      alert('Please enter your email');
+      alert("Please enter your email");
     }
   };
 
@@ -52,7 +62,7 @@ const AuthView = ({onAuth}) => {
       <div className="w-full max-w-md sm:max-w-md mx-auto">
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <StarkenLogo/>
+            <StarkenLogo />
           </div>
           <h1 className="text-3xl font-bold text-white mb-2">Starken</h1>
           <p className="text-gray-400">Gaming NFT Marketplace</p>
@@ -60,26 +70,34 @@ const AuthView = ({onAuth}) => {
 
         <div className="bg-[#232323] rounded-2xl p-8 border border-gray-800 shadow-lg">
           {/* Login Form */}
-          {authView === 'login' && (
+          {authView === "login" && (
             <form onSubmit={handleLogin}>
               <h2 className="text-2xl font-bold text-white mb-6">Login</h2>
               <div className="mb-4">
-                <label className="block text-gray-400 text-sm mb-2">Email</label>
+                <label className="block text-gray-400 text-sm mb-2">
+                  Email
+                </label>
                 <input
                   type="email"
                   value={loginData.email}
-                  onChange={(e) => setLoginData({...loginData, email: e.target.value})}
+                  onChange={(e) =>
+                    setLoginData({ ...loginData, email: e.target.value })
+                  }
                   className="w-full bg-gray-800 border border-gray-700 rounded-lg pl-4 pr-4 py-3 text-white focus:outline-none focus:border-blue-600"
                   placeholder="Enter your email"
                 />
               </div>
               <div className="mb-6">
-                <label className="block text-gray-400 text-sm mb-2">Password</label>
+                <label className="block text-gray-400 text-sm mb-2">
+                  Password
+                </label>
                 <div className="relative">
                   <input
-                    type={showPassword ? 'text' : 'password'}
+                    type={showPassword ? "text" : "password"}
                     value={loginData.password}
-                    onChange={(e) => setLoginData({...loginData, password: e.target.value})}
+                    onChange={(e) =>
+                      setLoginData({ ...loginData, password: e.target.value })
+                    }
                     className="w-full bg-gray-800 border border-gray-700 rounded-lg pl-4 pr-12 py-3 text-white focus:outline-none focus:border-blue-600"
                     placeholder="Enter your password"
                   />
@@ -88,13 +106,13 @@ const AuthView = ({onAuth}) => {
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white"
                   >
-                    {showPassword ? 'Hide' : 'Show'}
+                    {showPassword ? "Hide" : "Show"}
                   </button>
                 </div>
               </div>
               <button
                 type="button"
-                onClick={() => setAuthView('forgot')}
+                onClick={() => setAuthView("forgot")}
                 className="text-blue-400 hover:text-blue-300 text-sm mb-6 block"
               >
                 Forgot Password?
@@ -106,10 +124,10 @@ const AuthView = ({onAuth}) => {
                 Login
               </button>
               <p className="text-center text-gray-400 text-sm">
-                Don't have an account?{' '}
+                Don't have an account?{" "}
                 <button
                   type="button"
-                  onClick={() => setAuthView('signup')}
+                  onClick={() => setAuthView("signup")}
                   className="text-blue-400 hover:text-blue-300"
                 >
                   Sign Up
@@ -118,7 +136,7 @@ const AuthView = ({onAuth}) => {
             </form>
           )}
           {/* Signup Form */}
-          {authView === 'signup' && (
+          {authView === "signup" && (
             <form onSubmit={handleSignup}>
               <h2 className="text-2xl font-bold text-white mb-6">Sign Up</h2>
               <div className="mb-4">
@@ -126,28 +144,38 @@ const AuthView = ({onAuth}) => {
                 <input
                   type="text"
                   value={signupData.name}
-                  onChange={(e) => setSignupData({...signupData, name: e.target.value})}
+                  onChange={(e) =>
+                    setSignupData({ ...signupData, name: e.target.value })
+                  }
                   className="w-full bg-gray-800 border border-gray-700 rounded-lg pl-4 pr-4 py-3 text-white focus:outline-none focus:border-blue-600"
                   placeholder="Enter your name"
                 />
               </div>
               <div className="mb-4">
-                <label className="block text-gray-400 text-sm mb-2">Email</label>
+                <label className="block text-gray-400 text-sm mb-2">
+                  Email
+                </label>
                 <input
                   type="email"
                   value={signupData.email}
-                  onChange={(e) => setSignupData({...signupData, email: e.target.value})}
+                  onChange={(e) =>
+                    setSignupData({ ...signupData, email: e.target.value })
+                  }
                   className="w-full bg-gray-800 border border-gray-700 rounded-lg pl-4 pr-4 py-3 text-white focus:outline-none focus:border-blue-600"
                   placeholder="Enter your email"
                 />
               </div>
               <div className="mb-4">
-                <label className="block text-gray-400 text-sm mb-2">Password</label>
+                <label className="block text-gray-400 text-sm mb-2">
+                  Password
+                </label>
                 <div className="relative">
                   <input
-                    type={showPassword ? 'text' : 'password'}
+                    type={showPassword ? "text" : "password"}
                     value={signupData.password}
-                    onChange={(e) => setSignupData({...signupData, password: e.target.value})}
+                    onChange={(e) =>
+                      setSignupData({ ...signupData, password: e.target.value })
+                    }
                     className="w-full bg-gray-800 border border-gray-700 rounded-lg pl-4 pr-12 py-3 text-white focus:outline-none focus:border-blue-600"
                     placeholder="Create password"
                   />
@@ -156,16 +184,23 @@ const AuthView = ({onAuth}) => {
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white"
                   >
-                    {showPassword ? 'Hide' : 'Show'}
+                    {showPassword ? "Hide" : "Show"}
                   </button>
                 </div>
               </div>
               <div className="mb-6">
-                <label className="block text-gray-400 text-sm mb-2">Confirm Password</label>
+                <label className="block text-gray-400 text-sm mb-2">
+                  Confirm Password
+                </label>
                 <input
-                  type={showPassword ? 'text' : 'password'}
+                  type={showPassword ? "text" : "password"}
                   value={signupData.confirmPassword}
-                  onChange={(e) => setSignupData({...signupData, confirmPassword: e.target.value})}
+                  onChange={(e) =>
+                    setSignupData({
+                      ...signupData,
+                      confirmPassword: e.target.value,
+                    })
+                  }
                   className="w-full bg-gray-800 border border-gray-700 rounded-lg pl-4 pr-4 py-3 text-white focus:outline-none focus:border-blue-600"
                   placeholder="Confirm password"
                 />
@@ -177,10 +212,10 @@ const AuthView = ({onAuth}) => {
                 Create Account
               </button>
               <p className="text-center text-gray-400 text-sm">
-                Already have an account?{' '}
+                Already have an account?{" "}
                 <button
                   type="button"
-                  onClick={() => setAuthView('login')}
+                  onClick={() => setAuthView("login")}
                   className="text-blue-400 hover:text-blue-300"
                 >
                   Login
@@ -189,12 +224,18 @@ const AuthView = ({onAuth}) => {
             </form>
           )}
           {/* Forgot Password Form */}
-          {authView === 'forgot' && (
+          {authView === "forgot" && (
             <form onSubmit={handleForgotPassword}>
-              <h2 className="text-2xl font-bold text-white mb-2">Forgot Password</h2>
-              <p className="text-gray-400 text-sm mb-6">Enter your email to receive a password reset link</p>
+              <h2 className="text-2xl font-bold text-white mb-2">
+                Forgot Password
+              </h2>
+              <p className="text-gray-400 text-sm mb-6">
+                Enter your email to receive a password reset link
+              </p>
               <div className="mb-6">
-                <label className="block text-gray-400 text-sm mb-2">Email</label>
+                <label className="block text-gray-400 text-sm mb-2">
+                  Email
+                </label>
                 <input
                   type="email"
                   value={forgotEmail}
@@ -211,7 +252,7 @@ const AuthView = ({onAuth}) => {
               </button>
               <button
                 type="button"
-                onClick={() => setAuthView('login')}
+                onClick={() => setAuthView("login")}
                 className="w-full text-gray-400 hover:text-white text-sm"
               >
                 Back to Login

@@ -59,6 +59,6 @@ if (rpcUrl === "") {
 const provider =
   rpcUrl === "" || containsDevnet(scaffoldConfig.targetNetworks)
     ? publicProvider()
-    : blastProvider({apiKey: '1NMKTU48466ACUF546XNCCV9E5I6ZPMEPI'});
+    : blastProvider({ apiKey: "1NMKTU48466ACUF546XNCCV9E5I6ZPMEPI" });
 
 export default provider;

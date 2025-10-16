@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import {ConnectedAddress} from "~~/components/ConnectedAddress";
+import { ConnectedAddress } from "~~/components/ConnectedAddress";
 import App from "~~/app/App";
 
 const Home = () => {
@@ -58,7 +58,7 @@ const Home = () => {
     //     </div>
     //   </div>
     // </div>
-    <App/>
+    <App />
   );
 };
 
