@@ -511,6 +511,7 @@ const exportDeployments = () => {
 };
 
 const assertDeployerDefined = () => {
+  console.error(deployer);
   if (!deployer) {
     const errorMessage = `Deployer account is not defined. \`ACCOUNT_ADDRESS_${networkName.toUpperCase()}\` or \`PRIVATE_KEY_${networkName.toUpperCase()}\` is missing from \`.env\`.`;
     console.error(red(errorMessage));
