@@ -1,4 +1,4 @@
-import { Chain } from "@starknet-react/chains";
+import {Chain, devnet} from "@starknet-react/chains";
 import { supportedChains as chains } from "./supportedChains";
 
 export type ScaffoldConfig = {
@@ -10,7 +10,7 @@ export type ScaffoldConfig = {
 };
 
 const scaffoldConfig = {
-  targetNetworks: [chains.devnet],
+  targetNetworks: [devnet],
   // Only show the Burner Wallet when running on devnet
   onlyLocalBurnerWallet: false,
   // The interval at which your front-end polls the RPC servers for new data

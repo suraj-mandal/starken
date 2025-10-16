@@ -1,11 +1,15 @@
-import React, { useState } from "react";
+'use client';
+
+import React, {useState} from "react";
+import Image from "next/image";
+import ChessImage from "../../public/assets/second_sword.jpg";
 
 const featuredItems = [
   {
     id: 1,
     title: "Ethereal Blade of .....",
     game: "CyberRealm",
-    image: "chess",
+    image: "/assets/photo2.jpg",
     price: "8.5",
     usdPrice: "$6500",
     owner: "Charles",
@@ -21,7 +25,7 @@ const featuredItems = [
     id: 2,
     title: "Guardian's Crystal..",
     game: "MysticQuest",
-    image: "guardian",
+    image: "/assets/sword.jpg",
     price: "8.5",
     usdPrice: "$6500",
     owner: "Alex",
@@ -35,7 +39,7 @@ const featuredItems = [
     id: 3,
     title: "Prismatic Core ....",
     game: "ElementalWars",
-    image: "prismatic",
+    image: "/assets/second_sword.jpg",
     price: "8.5",
     usdPrice: "$6500",
     owner: "Jordan",
@@ -49,7 +53,7 @@ const featuredItems = [
     id: 4,
     title: "Storm Caller's Sta....",
     game: "Game King",
-    image: "storm",
+    image: "/assets/surreal.jpg",
     price: "8.5",
     usdPrice: "$6500",
     owner: "Morgan",
@@ -184,7 +188,7 @@ const Marketplace = () => {
                   type="text"
                   value={newItem.title}
                   onChange={(e) =>
-                    setNewItem({ ...newItem, title: e.target.value })
+                    setNewItem({...newItem, title: e.target.value})
                   }
                   className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white"
                   required
@@ -198,7 +202,7 @@ const Marketplace = () => {
                   type="text"
                   value={newItem.game}
                   onChange={(e) =>
-                    setNewItem({ ...newItem, game: e.target.value })
+                    setNewItem({...newItem, game: e.target.value})
                   }
                   className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white"
                   required
@@ -211,7 +215,7 @@ const Marketplace = () => {
                 <select
                   value={newItem.image}
                   onChange={(e) =>
-                    setNewItem({ ...newItem, image: e.target.value })
+                    setNewItem({...newItem, image: e.target.value})
                   }
                   className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white"
                 >
@@ -230,7 +234,7 @@ const Marketplace = () => {
                   type="number"
                   value={newItem.price}
                   onChange={(e) =>
-                    setNewItem({ ...newItem, price: e.target.value })
+                    setNewItem({...newItem, price: e.target.value})
                   }
                   className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white"
                   required
@@ -244,7 +248,7 @@ const Marketplace = () => {
                   type="text"
                   value={newItem.usdPrice}
                   onChange={(e) =>
-                    setNewItem({ ...newItem, usdPrice: e.target.value })
+                    setNewItem({...newItem, usdPrice: e.target.value})
                   }
                   className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white"
                 />
@@ -257,7 +261,7 @@ const Marketplace = () => {
                   type="text"
                   value={newItem.fullTitle}
                   onChange={(e) =>
-                    setNewItem({ ...newItem, fullTitle: e.target.value })
+                    setNewItem({...newItem, fullTitle: e.target.value})
                   }
                   className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white"
                 />
@@ -269,7 +273,7 @@ const Marketplace = () => {
                 <textarea
                   value={newItem.description}
                   onChange={(e) =>
-                    setNewItem({ ...newItem, description: e.target.value })
+                    setNewItem({...newItem, description: e.target.value})
                   }
                   className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white"
                 />
@@ -282,7 +286,7 @@ const Marketplace = () => {
                   type="number"
                   value={newItem.power}
                   onChange={(e) =>
-                    setNewItem({ ...newItem, power: e.target.value })
+                    setNewItem({...newItem, power: e.target.value})
                   }
                   className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white"
                 />
@@ -295,7 +299,7 @@ const Marketplace = () => {
                   type="text"
                   value={newItem.priceChange}
                   onChange={(e) =>
-                    setNewItem({ ...newItem, priceChange: e.target.value })
+                    setNewItem({...newItem, priceChange: e.target.value})
                   }
                   className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white"
                 />
@@ -308,7 +312,7 @@ const Marketplace = () => {
                   type="number"
                   value={newItem.currentPrice}
                   onChange={(e) =>
-                    setNewItem({ ...newItem, currentPrice: e.target.value })
+                    setNewItem({...newItem, currentPrice: e.target.value})
                   }
                   className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white"
                   required
@@ -351,17 +355,12 @@ const Marketplace = () => {
                 onClick={() => setSelectedItem(item)}
                 className="cursor-pointer"
               >
-                <div className="h-40 w-full bg-black flex items-center justify-center overflow-hidden border-b border-gray-700">
+                <div
+                  className="h-40 w-full bg-black flex items-center justify-center overflow-hidden border-b border-gray-700">
                   {/* Replace with actual image later */}
-                  {item.image === "chess" ? (
-                    <img
-                      src="/assets/react.svg"
-                      alt="Chess"
-                      className="w-full h-full object-cover grayscale"
-                    />
-                  ) : (
-                    <div className="text-5xl text-white">?</div>
-                  )}
+                  <Image src={item.image} width={100} height={100} alt={item.title}
+                         className="w-full h-full object-cover"/>
+                  {/*<img src="chess.jpg" alt={item.title} className="w-full h-full object-cover grayscale"/>*/}
                 </div>
                 <div className="p-5">
                   <h3 className="text-white font-bold text-lg mb-1">
@@ -419,7 +418,8 @@ const Marketplace = () => {
 
         {/* Item Detail Modal - Figma inspired design */}
         {selectedItem && (
-          <div className="fixed inset-0 bg-black bg-opacity-95 z-50 flex items-center justify-center overflow-y-auto p-2 sm:p-0">
+          <div
+            className="fixed inset-0 bg-black bg-opacity-95 z-50 flex items-center justify-center overflow-y-auto p-2 sm:p-0">
             <div className="bg-[#232323] rounded-2xl w-full max-w-md m-0 sm:m-4 border border-gray-800 shadow-xl">
               <div className="relative">
                 <button
@@ -428,7 +428,8 @@ const Marketplace = () => {
                 >
                   &lt;
                 </button>
-                <div className="h-44 bg-black flex items-center justify-center rounded-t-2xl overflow-hidden border border-gray-700">
+                <div
+                  className="h-44 bg-black flex items-center justify-center rounded-t-2xl overflow-hidden border border-gray-700">
                   {/* Replace with actual image later */}
                   {selectedItem.image === "chess" ? (
                     <img
