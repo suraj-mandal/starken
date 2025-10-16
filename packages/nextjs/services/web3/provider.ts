@@ -1,5 +1,6 @@
 import scaffoldConfig from "~~/scaffold.config";
 import {
+  blastProvider,
   jsonRpcProvider,
   publicProvider,
   starknetChainId,
@@ -58,11 +59,6 @@ if (rpcUrl === "") {
 const provider =
   rpcUrl === "" || containsDevnet(scaffoldConfig.targetNetworks)
     ? publicProvider()
-    : jsonRpcProvider({
-        rpc: () => ({
-          nodeUrl: rpcUrl,
-          chainId: starknetChainId(currentNetwork.id),
-        }),
-      });
+    : blastProvider({apiKey: '1NMKTU48466ACUF546XNCCV9E5I6ZPMEPI'});
 
 export default provider;

@@ -7,7 +7,7 @@ const deployedContracts = {
   devnet: {
     MyNFT: {
       address:
-        "0x7e87e0633b572c3e03660a30a38e4c6bce4fabfd385f4cdca643def11ddbaab",
+        "0x2ea47a7e5cac6f2abb681a555be50c433ce49bdb3af828dbd93c538e9942ef5",
       abi: [
         {
           type: "impl",
@@ -668,7 +668,7 @@ const deployedContracts = {
     },
     NFTMarketplace: {
       address:
-        "0x7b47f793aee816334470ac0ba7ff661418616f2c6bc74cde5cf6f214c7b1a21",
+        "0x6db7886ff08446c310c47de8879dc9e3bb2d770b4b2d34c8a33c58cc6f69eea",
       abi: [
         {
           type: "impl",
